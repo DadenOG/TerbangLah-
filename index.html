@@ -127,7 +127,7 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
  <div class="mob" id="cards"></div>
 </section>
 </main>
-<main id="p-dt" class="pg" hidden><section class="card"><h2>Data &amp; backup</h2><p class="mut">Everything is stored in this browser on this device. Export a backup regularly, and use it to move your logbook between your PC and iPhone.</p><div class="btns"><button class="p" id="exp">Export backup</button><button id="imp">Import backup</button></div><h2 style="margin-top:18px">Sample data</h2><div class="btns"><button id="smp">Load sample flights</button><button id="clr" class="d">Clear sample flights</button></div></section></main>
+<main id="p-dt" class="pg" hidden><section class="card"><h2>Data &amp; backup</h2><p class="mut">Everything is stored in this browser on this device. Export a backup regularly, and use it to move your logbook between your PC and iPhone.</p><div class="btns"><button class="p" id="exp">Export backup</button><button id="imp">Import backup</button></div><h2 style="margin-top:18px">Sample data</h2><div class="btns"><button id="smp">Load sample flights</button><button id="clr" class="d">Clear sample flights</button></div><h2 style="margin-top:18px">Account</h2><div class="btns"><button class="d" id="so2">Sign out</button></div></section></main>
 </div>
 
 <dialog id="dlg"><form method="dialog" id="frm" onsubmit="return false">
@@ -195,7 +195,7 @@ function sample(){const s=[
  ];return s.map(o=>mk(Object.assign(o,{sample:true})))}
 let S=[];
 // ---- Supabase cloud storage & auth ----
-const SUPABASE_URL="https://fmchupnkiklbxcuqinxv.supabase.co",SUPABASE_ANON_KEY="sb_publishable_evHdBoLDevj1WI6vny-hPg_rTYNn1z9";
+const SUPABASE_URL="https://fmchupnkiklbxcuqinxv.supabase.co/rest/v1/",SUPABASE_ANON_KEY="sb_publishable_evHdBoLDevj1WI6vny-hPg_rTYNn1z9";
 let sb=null,SB_ERR="";
 try{if(!/YOUR_SUPABASE/.test(SUPABASE_URL+SUPABASE_ANON_KEY)){if(typeof supabase==="undefined")throw new Error("The Supabase library could not be downloaded. Check your internet connection or ad blocker, and open this file in a normal browser tab (not a preview pane).");sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}}catch(e){SB_ERR=e.message}
 window.addEventListener("error",e=>{const m=document.getElementById("am");if(m&&!USER){m.style.color="var(--bad)";m.textContent="Error: "+e.message}});
@@ -232,7 +232,8 @@ const creds=()=>({email:$("#ae").value.trim(),password:$("#ap2").value});
 $("#asi").onclick=async()=>{if(!sb)return boot();authMsg("Signing in…",1);const{error}=await sb.auth.signInWithPassword(creds());if(error)authMsg(error.message)};
 $("#asu").onclick=async()=>{if(!sb)return boot();authMsg("Creating account…",1);const{data,error}=await sb.auth.signUp(creds());if(error)authMsg(error.message);else if(!data.session)authMsg("Check your email to confirm your account, then sign in.",1)};
 $("#ap2").addEventListener("keydown",e=>{if(e.key==="Enter")$("#asi").click()});
-$("#so").onclick=()=>{if(sb)sb.auth.signOut()};
+async function doSignOut(){setSync("Signing out\u2026");try{if(sb)await sb.auth.signOut({scope:"local"})}catch(e){}applySession(null);setSync("");authMsg("Signed out.",1)}
+$("#so").onclick=doSignOut;$("#so2").onclick=doSignOut;
 const A=l=>{const z={n:0,tot:0,pic:0,sic:0,dual:0,night:0,xc:0,ifr:0,ldg:0};l.forEach(x=>{z.n++;z.tot+=+x.tot||0;z.pic+=+x.picH||0;z.sic+=+x.sicH||0;z.dual+=+x.dual||0;z.night+=+x.night||0;z.xc+=+x.xc||0;z.ifr+=+x.ifr||0;z.ldg+=(+x.ldgD||0)+(+x.ldgN||0)});return z};
 const crewOf=x=>[x.pic,x.sic,x.instr,...String(x.crew||"").split(",")].map(s=>(s||"").trim()).filter(Boolean);
 const codes=x=>[x.dep,x.arr].map(s=>(s||"").trim().toUpperCase()).filter(Boolean);
@@ -411,9 +412,11 @@ try{LC=JSON.parse(localStorage.getItem(LK))||[]}catch(e){LC=[]}
 function saveL(){try{localStorage.setItem(LK,JSON.stringify(LC))}catch(e){}}
 const dleft=d=>Math.ceil((new Date(d+"T00:00:00")-new Date(new Date().toDateString()))/864e5);
 function lstat(x){if(!x.exp)return{c:"",t:"No expiry",k:3};const d=dleft(x.exp);return d<0?{c:"bdc",t:`Expired ${-d} days ago`,k:0}:d<=90?{c:"warn",t:`${d} days left`,k:1}:{c:"gd",t:`Valid · ${d} days left`,k:2}}
+const chipsOf=l=>(l||[]).length?`<div class="chips" style="margin-top:6px">${l.map(f=>`<button class="chip" data-pf="${f.id}" data-pn="${esc(f.name)}">📄 ${esc(f.name)}</button>`).join("")}</div>`:"";
+function hist(x){const h=x.history||[];return (x.updated?`<div class="mut" style="margin-top:6px">✅ Renewed / updated ${esc(x.updated)}</div>`:"")+(h.length?`<details style="margin-top:8px"><summary class="mut" style="cursor:pointer">Previous versions (${h.length})</summary>${[...h].reverse().map(v=>`<div style="padding:8px 0;border-top:1px solid var(--line)"><b>${esc(v.name)}</b> <span class="mut">superseded ${esc(v.archived)}</span><div class="mut">${esc([v.no&&"No. "+v.no,v.auth].filter(Boolean).join(" · "))}</div><div class="mut">Issued ${esc(v.iss||"—")} · Valid until ${esc(v.exp||"—")}</div>${v.note?`<div class="mut">${esc(v.note)}</div>`:""}${chipsOf(v.files)}</div>`).join("")}</details>`:"")}
 function renderLic(){
  const L=[...LC].sort((a,b)=>lstat(a).k-lstat(b).k||(a.exp||"9").localeCompare(b.exp||"9"));
- $("#lgrid").innerHTML=L.map(x=>{const s=lstat(x);return `<div class="ac"><div class="bd2"><div class="top2"><span class="pill lc">${esc(x.cat)}</span><b class="${s.c}">${s.t}</b></div><div class="rt">${esc(x.name)}</div><div class="mut">${esc([x.no&&"No. "+x.no,x.auth].filter(Boolean).join(" · "))}</div><div class="hr"><span>Issued <b>${esc(x.iss||"—")}</b></span><span>Valid until <b>${esc(x.exp||"—")}</b></span></div>${x.note?`<div class="mut">${esc(x.note)}</div>`:""}${(x.files||[]).length?`<div class="chips" style="margin-top:8px">${x.files.map(f=>`<button class="chip" data-pf="${f.id}" data-pn="${esc(f.name)}">📄 ${esc(f.name)}</button>`).join("")}</div>`:""}<div class="btns" style="margin-top:8px"><button data-le="${x.id}">Edit</button><button class="d" data-lx="${x.id}">Delete</button></div></div></div>`}).join("")||`<div class="empty">No licences yet. Tap “+ Add” to record your licence, ratings and medical with their validity dates.</div>`;
+ $("#lgrid").innerHTML=L.map(x=>{const s=lstat(x);return `<div class="ac"><div class="bd2"><div class="top2"><span class="pill lc">${esc(x.cat)}</span><b class="${s.c}">${s.t}</b></div><div class="rt">${esc(x.name)}</div><div class="mut">${esc([x.no&&"No. "+x.no,x.auth].filter(Boolean).join(" · "))}</div><div class="hr"><span>Issued <b>${esc(x.iss||"—")}</b></span><span>Valid until <b>${esc(x.exp||"—")}</b></span></div>${x.note?`<div class="mut">${esc(x.note)}</div>`:""}${(x.files||[]).length?`<div class="chips" style="margin-top:8px">${x.files.map(f=>`<button class="chip" data-pf="${f.id}" data-pn="${esc(f.name)}">📄 ${esc(f.name)}</button>`).join("")}</div>`:""}${hist(x)}<div class="btns" style="margin-top:8px"><button data-le="${x.id}">Edit</button><button class="d" data-lx="${x.id}">Delete</button></div></div></div>`}).join("")||`<div class="empty">No licences yet. Tap “+ Add” to record your licence, ratings and medical with their validity dates.</div>`;
  const w=L.filter(x=>lstat(x).k<2);
  $("#lcb").innerHTML=w.length?`<div class="card warnb" data-t="lc" style="margin-bottom:12px;cursor:pointer"><b>⚠ ${w.length} licence item${w.length>1?"s":""} need attention</b><div class="mut">${w.map(x=>esc(x.name)+" – "+lstat(x).t).join(" · ")}</div></div>`:"";
 }
@@ -430,12 +433,15 @@ const lcd=$("#lcd"),LF={cat:"lcc",name:"lcn",no:"lco",auth:"lca",iss:"lci",exp:"
 function openLc(x){lcEdit=x?x.id:null;$("#lch").textContent=x?"Edit item":"Add licence, rating or medical";for(const k in LF)$("#"+LF[k]).value=x?(x[k]||""):(k==="cat"?"Licence":"");lcFiles=x&&x.files?x.files.map(f=>({...f})):[];lcOrig=lcFiles.map(f=>f.id);$("#lcf").value="";lcfl();lcd.showModal()}
 $("#nl").onclick=()=>openLc();$("#lcx").onclick=()=>lcd.close();
 $("#lcs").onclick=async()=>{const o={};for(const k in LF)o[k]=$("#"+LF[k]).value.trim();if(!o.name){$("#lcn").focus();return}
- try{for(const f of lcFiles)if(f.blob)await idbDo("put",f.id,f.blob);for(const id of lcOrig)if(!lcFiles.some(f=>f.id===id))await idbDo("del",id)}catch(e){}
  o.files=lcFiles.map(({id,name,size})=>({id,name,size}));
- if(lcEdit)Object.assign(LC.find(x=>x.id===lcEdit),o);else LC.push(Object.assign({id:uid()},o));lcd.close();render()};
+ const cur=lcEdit&&LC.find(x=>x.id===lcEdit);
+ // Renewal = new issue/expiry date, new number, or a newly attached file -> keep the old version in history
+ const renewed=!!cur&&(cur.exp!==o.exp||cur.iss!==o.iss||cur.no!==o.no||o.files.some(f=>!(cur.files||[]).some(g=>g.id===f.id)));
+ try{for(const f of lcFiles)if(f.blob)await idbDo("put",f.id,f.blob);if(!renewed)for(const id of lcOrig)if(!lcFiles.some(f=>f.id===id))await idbDo("del",id)}catch(e){}
+ if(cur){if(renewed){const{history,...prev}=cur;cur.history=[...(history||[]),{...prev,archived:new Date().toISOString().slice(0,10)}];o.updated=new Date().toISOString().slice(0,10)}Object.assign(cur,o)}else LC.push(Object.assign({id:uid()},o));lcd.close();render()};
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
  if(d.le)openLc(LC.find(x=>x.id===d.le));
- if(d.lx){if(d.arm){(LC.find(x=>x.id===d.lx)?.files||[]).forEach(f=>idbDo("del",f.id).catch(()=>{}));LC=LC.filter(x=>x.id!==d.lx);render()}else{document.querySelectorAll("[data-lx]").forEach(n=>{n.dataset.arm="";n.textContent="Delete"});d.arm="1";b.textContent="Sure?"}}
+ if(d.lx){if(d.arm){((l=>[...(l?.files||[]),...(l?.history||[]).flatMap(h=>h.files||[])])(LC.find(x=>x.id===d.lx))).forEach(f=>idbDo("del",f.id).catch(()=>{}));LC=LC.filter(x=>x.id!==d.lx);render()}else{document.querySelectorAll("[data-lx]").forEach(n=>{n.dataset.arm="";n.textContent="Delete"});d.arm="1";b.textContent="Sure?"}}
 });
 tab("sum");render();boot();
 </script>
