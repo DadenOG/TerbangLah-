@@ -195,7 +195,7 @@ function sample(){const s=[
  ];return s.map(o=>mk(Object.assign(o,{sample:true})))}
 let S=[];
 // ---- Supabase cloud storage & auth ----
-const SUPABASE_URL="https://fmchupnkiklbxcuqinxv.supabase.co/rest/v1/",SUPABASE_ANON_KEY="sb_publishable_evHdBoLDevj1WI6vny-hPg_rTYNn1z9";
+const SUPABASE_URL="https://fmchupnkiklbxcuqinxv.supabase.co/",SUPABASE_ANON_KEY="sb_publishable_evHdBoLDevj1WI6vny-hPg_rTYNn1z9";
 let sb=null,SB_ERR="";
 try{if(!/YOUR_SUPABASE/.test(SUPABASE_URL+SUPABASE_ANON_KEY)){if(typeof supabase==="undefined")throw new Error("The Supabase library could not be downloaded. Check your internet connection or ad blocker, and open this file in a normal browser tab (not a preview pane).");sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}}catch(e){SB_ERR=e.message}
 window.addEventListener("error",e=>{const m=document.getElementById("am");if(m&&!USER){m.style.color="var(--bad)";m.textContent="Error: "+e.message}});
