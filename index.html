@@ -364,7 +364,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)r
  if(d.ax){if(d.arm){AC=AC.filter(a=>a.id!==d.ax);render()}else{document.querySelectorAll("[data-ax]").forEach(n=>{n.dataset.arm="";n.textContent="Delete"});d.arm="1";b.textContent="Sure?"}}
  if(d.fdel){if(d.arm){AC=AC.filter(a=>a.fleetId!==curF);F=F.filter(f=>f.id!==curF);curF="";render()}else{d.arm="1";b.textContent="Delete fleet and its aircraft?"}}
 });
-// ---- Tabs, summary, analytics ----
+// ---- Tabs, summary, analytics --------
 const TABS=[["sum","◉","Summary"],["lg","☰","Logbook"],["fl","✈","Fleet"],["lc","★","Licences"],["an","▤","Stats"],["dt","⇅","Data"]];
 function tab(k){TABS.forEach(([t])=>{$("#p-"+t).hidden=t!==k});document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===k));scrollTo(0,0)}
 $("#tabs").innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}"><i>${i}</i>${l}</button>`).join("");
