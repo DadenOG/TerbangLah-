@@ -72,11 +72,18 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 .pill.lc{background:var(--acc)}.warn{color:#d98a00}.warnb{border-color:#d98a00}.top2{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;align-items:center}
 @media (max-width:860px){header{justify-content:space-between}}
 #auth{padding:16px}#auth input{margin-bottom:2px}
+.hero{margin-bottom:12px;background:linear-gradient(135deg,var(--acc),var(--sim));color:#fff;border:0}.hero .mut{color:rgba(255,255,255,.9)}.hello{font-size:22px;font-weight:700;margin-bottom:4px}
+.chip.del{padding:2px 8px}#map{z-index:0}#pa{display:none}
+@media print{body>*:not(#pa){display:none!important}#pa{display:block;color:#000;background:#fff}#pa table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}#pa td,#pa th{border:1px solid #999;padding:3px;text-align:left}#pa h1{font-size:18px}}
+@media (max-width:860px){.tabs{overflow-x:auto;justify-content:flex-start}.tabs button{flex:0 0 auto;min-width:62px}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>')</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
+<div id="pa"></div>
 <div id="auth"><div class="card" style="max-width:380px;margin:12vh auto 0"><h1 class="brand">✈ TerbangLah!</h1><p class="mut">Sign in to your flight logbook</p><label>Email</label><input id="ae" type="email" autocomplete="email"><label style="margin-top:10px">Password</label><input id="ap2" type="password" autocomplete="current-password"><div class="btns" style="margin-top:14px"><button class="p" id="asi">Sign in</button><button id="asu">Create account</button></div><div id="am" style="margin-top:10px;font-size:14px" class="mut">Loading…</div></div></div>
 <div class="wrap" id="app" hidden>
 <header>
@@ -88,7 +95,7 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
  </div>
 </header>
 
-<main id="p-sum" class="pg"><div id="lcb"></div><section class="kpis" id="kpis"></section>
+<main id="p-sum" class="pg"><div id="welcome"></div><div id="lcb"></div><section class="kpis" id="kpis"></section>
 <section class="tiles" id="tiles"></section>
 <section class="grid2">
  <div class="card"><h2>Flight vs Simulator breakdown</h2><div class="scroll"><table class="bd" id="bd"></table></div></div>
@@ -97,11 +104,16 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 <section class="grid2"><div class="card"><h2>Currency &amp; recency</h2><div id="cur"></div></div><div class="card"><h2>Career goal &amp; milestones</h2><div id="goal"></div></div></section>
 </main>
 
+<main id="p-hub" class="pg" hidden><div class="tiles" id="hubk"></div><section class="grid2"><div class="card"><h2>Route map</h2><div id="map" style="height:380px;border-radius:12px"></div><div class="mut" id="mapn" style="margin-top:6px"></div></div><div class="card"><h2>Fun facts</h2><div id="facts"></div></div></section></main>
+
+<main id="p-bd" class="pg" hidden><section class="card"><div class="sum"><h2 style="margin:0">Pilot leaderboard</h2><div class="btns"><select id="bm" style="width:auto"><option value="total">Total hours</option><option value="flight">Flight hours</option><option value="sim">Simulator hours</option></select><button id="br">Refresh</button></div></div><div class="scroll" id="bt"></div></section><section class="card" style="margin-top:12px"><h2>Your leaderboard profile</h2><label>Display name</label><input id="bn" maxlength="30" placeholder="Shown to other pilots"><label style="margin-top:8px"><input type="checkbox" id="bs" style="width:auto;min-height:0"> Show me on the leaderboard</label><div class="btns" style="margin-top:10px"><button class="p" id="bsave">Save profile</button></div><div class="mut" id="bmsg" style="margin-top:8px">Only your display name and hours are visible to other pilots. Flights, crew names and licences stay private.</div></section></main>
+
 <main id="p-lc" class="pg" hidden><section class="card"><div class="sum"><h2 style="margin:0">Licences, ratings &amp; medical</h2><button class="p" id="nl">+ Add</button></div><div class="fgrid" id="lgrid"></div></section></main>
 
 <main id="p-an" class="pg" hidden>
 <section class="grid2"><div class="card"><h2>Hours per month (last 12)</h2><div id="mo"></div></div><div class="card"><h2>Hours by year</h2><div class="scroll" id="yr"></div></div></section>
 <section class="grid2"><div class="card"><h2>Hours by aircraft type</h2><div id="ch2"></div></div><div class="card"><h2>Top aerodromes</h2><div id="ap"></div><h2 style="margin-top:16px">Most flown with</h2><div id="cw"></div></div></section>
+<section class="grid2"><div class="card"><h2>Top routes (city pairs)</h2><div id="troutes"></div></div><div class="card"><h2>Crew &amp; instructors</h2><div class="scroll" id="crewt"></div></div></section>
 </main>
 
 <main id="p-fl" class="pg" hidden><section class="card" id="fleet" style="margin-bottom:12px">
@@ -114,6 +126,7 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 </main>
 <main id="p-lg" class="pg" hidden><section class="card">
  <h2>Flight log</h2>
+ <div class="chips" id="pre" style="margin-bottom:8px"></div><div class="chips" id="qj" style="margin-bottom:10px"></div>
  <div class="filters">
   <div class="s"><input id="q" type="search" placeholder="Search remarks, flight, tail, type, crew, aerodromes…"></div>
   <select id="fe"><option value="">All environments</option><option value="Real">Flight</option><option>Simulator</option></select>
@@ -127,7 +140,7 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
  <div class="mob" id="cards"></div>
 </section>
 </main>
-<main id="p-dt" class="pg" hidden><section class="card"><h2>Data &amp; backup</h2><p class="mut">Everything is stored in this browser on this device. Export a backup regularly, and use it to move your logbook between your PC and iPhone.</p><div class="btns"><button class="p" id="exp">Export backup</button><button id="imp">Import backup</button></div><h2 style="margin-top:18px">Sample data</h2><div class="btns"><button id="smp">Load sample flights</button><button id="clr" class="d">Clear sample flights</button></div><h2 style="margin-top:18px">Account</h2><div class="btns"><button class="d" id="so2">Sign out</button></div></section></main>
+<main id="p-dt" class="pg" hidden><section class="card"><h2>Data &amp; backup</h2><p class="mut">Everything is stored in this browser on this device. Export a backup regularly, and use it to move your logbook between your PC and iPhone.</p><div class="btns"><button class="p" id="exp">Export backup</button><button id="imp">Import backup</button></div><h2 style="margin-top:18px">Sample data</h2><div class="btns"><button id="smp">Load sample flights</button><button id="clr" class="d">Clear sample flights</button></div><h2 style="margin-top:18px">Reports</h2><div class="btns"><button id="rp1">Print / save as PDF (current filter)</button><button id="rp2">Print career summary</button><button id="rp3">Export filtered CSV</button></div><h2 style="margin-top:18px">Account</h2><div class="btns"><button class="d" id="so2">Sign out</button></div></section></main>
 </div>
 
 <dialog id="dlg"><form method="dialog" id="frm" onsubmit="return false">
@@ -157,6 +170,7 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
   <div></div>
   <div><label>Day landings</label><input type="number" step="1" min="0" name="ldgD"></div>
   <div><label>Night landings</label><input type="number" step="1" min="0" name="ldgN"></div>
+  <div><label>Off-block</label><input name="offB" placeholder="hh:mm"></div><div><label>On-block</label><input name="onB" placeholder="hh:mm"></div><div><label>Day approaches</label><input type="number" min="0" name="apD"></div><div><label>Night approaches</label><input type="number" min="0" name="apN"></div><div><label>Holds</label><input type="number" min="0" name="holds"></div><div class="w2"><label>Scenario / duty note</label><input name="scen"></div>
   <div class="w4"><label>Remarks</label><textarea name="rem" rows="3"></textarea></div>
  </div>
  <div class="btns" style="margin-top:14px;justify-content:flex-end"><button type="button" id="fx">Cancel</button><button type="submit" class="p" id="fs2">Save flight</button></div>
@@ -171,19 +185,19 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 <dialog id="pvd" style="width:min(900px,96vw)"><div class="sum"><b id="pvn"></b><div class="btns"><a class="btn" id="pvo" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">Open in new tab</a><button id="pvx">Close</button></div></div><iframe id="pvf" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:10px;background:#fff"></iframe></dialog>
 <dialog id="lcd"><h2 id="lch">Add</h2><div class="fg"><div class="w2"><label>Category</label><select id="lcc"><option>Licence</option><option>Rating</option><option>Medical</option><option>Endorsement</option><option>Other</option></select></div><div class="w2"><label>Name</label><input id="lcn" placeholder="e.g. CPL(A), IR, Class 1 Medical"></div><div class="w2"><label>Number / reference</label><input id="lco"></div><div class="w2"><label>Authority</label><input id="lca"></div><div class="w2"><label>Issued</label><input type="date" id="lci"></div><div class="w2"><label>Valid until</label><input type="date" id="lce"></div><div class="w4"><label>Attach PDF files (max 15 MB each)</label><input type="file" id="lcf" accept="application/pdf,.pdf" multiple><div id="lcfl" style="margin-top:6px"></div></div><div class="w4"><label>Notes / restrictions</label><textarea id="lct" rows="2"></textarea></div></div><div class="btns" style="margin-top:14px;justify-content:flex-end"><button id="lcx">Cancel</button><button class="p" id="lcs">Save</button></div></dialog>
 <dialog id="fld"><h2>Fleet</h2><label>Fleet name</label><input id="fln" placeholder="e.g. Airline A320 fleet"><div class="btns" style="margin-top:14px;justify-content:flex-end"><button id="flx">Cancel</button><button class="p" id="fls">Save fleet</button></div></dialog>
-<dialog id="acd"><h2 id="acti">Add aircraft</h2><div class="fg"><div class="w2"><label>Fleet</label><select id="acf"></select></div><div class="w2"><label>Aircraft type</label><input id="act" placeholder="B737-800"></div><div class="w2"><label>Registration / Sim ID</label><input id="acr" placeholder="9M-XXX"></div><div class="w2"><label>Notes</label><input id="acn"></div></div><div class="btns" style="margin-top:14px;justify-content:flex-end"><button id="acx">Cancel</button><button class="p" id="acs">Save aircraft</button></div></dialog>
+<dialog id="acd"><h2 id="acti">Add aircraft</h2><div class="fg"><div class="w2"><label>Fleet</label><select id="acf"></select></div><div class="w2"><label>Aircraft type</label><input id="act" placeholder="B737-800"></div><div class="w2"><label>Registration / Sim ID</label><input id="acr" placeholder="9M-XXX"></div><div class="w2"><label>Notes</label><input id="acn"></div><div class="w2"><label>Default environment</label><select id="acv"><option value="Real">Flight</option><option>Simulator</option></select></div></div><div class="btns" style="margin-top:14px;justify-content:flex-end"><button id="acx">Cancel</button><button class="p" id="acs">Save aircraft</button></div></dialog>
 
 <script>
 const KEY="terbanglah.logbook.v1";
-const NUM=["tot","picH","sicH","dual","night","xc","ifr","ldgD","ldgN"];
-const COLS=["id","date","env","type","reg","dep","arr","route","pic","sic","instr","crew","flt","mission",...NUM,"rem"];
+const NUM=["tot","picH","sicH","dual","night","xc","ifr","ldgD","ldgN","apD","apN","holds"];
+const COLS=["id","date","env","type","reg","dep","arr","route","pic","sic","instr","crew","flt","mission",...NUM,"offB","onB","scen","rem"];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const f1=n=>{n=Math.round((+n||0)*60);return Math.floor(n/60)+":"+String(n%60).padStart(2,"0")};
 const HF=["tot","picH","sicH","dual","night","xc","ifr"];
 const pt=v=>{v=String(v).trim();if(!v)return 0;if(v.includes(":")){const[h,m]=v.split(":");return (+h||0)+(+m||0)/60}return parseFloat(v)||0};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-function mk(o){return Object.assign({id:uid(),date:"",env:"Real",type:"",reg:"",dep:"",arr:"",route:"",pic:"",sic:"",instr:"",crew:"",flt:"",mission:"",tot:0,picH:0,sicH:0,dual:0,night:0,xc:0,ifr:0,ldgD:0,ldgN:0,rem:""},o)}
+function mk(o){return Object.assign({id:uid(),date:"",env:"Real",type:"",reg:"",dep:"",arr:"",route:"",pic:"",sic:"",instr:"",crew:"",flt:"",mission:"",tot:0,picH:0,sicH:0,dual:0,night:0,xc:0,ifr:0,ldgD:0,ldgN:0,apD:0,apN:0,holds:0,offB:"",onB:"",scen:"",rem:""},o)}
 function sample(){const s=[
  {date:"2026-11-12",env:"Real",type:"B737-800",reg:"9M-LNA",dep:"WMKK",arr:"WBKK",route:"KK1A – DCT",pic:"Capt. Aziz Rahman",sic:"Me",flt:"MH2614",mission:"Line flight",tot:2.6,sicH:2.6,xc:2.6,ldgD:1,rem:"Smooth sector, light chop over the South China Sea."},
  {date:"2026-11-08",env:"Simulator",type:"B737-800",reg:"FFS-L2",dep:"WMKK",arr:"WMKK",route:"ILS 33 / go-around",instr:"Capt. Lim Wei Jun",pic:"Me",flt:"SIM-044",mission:"Recurrent training",tot:3.0,picH:3.0,dual:3.0,ifr:3.0,ldgD:2,ldgN:2,night:1.5,rem:"Engine failure after V1, single-engine ILS."},
@@ -195,34 +209,34 @@ function sample(){const s=[
  ];return s.map(o=>mk(Object.assign(o,{sample:true})))}
 let S=[];
 // ---- Supabase cloud storage & auth ----
-const SUPABASE_URL="https://fmchupnkiklbxcuqinxv.supabase.co/",SUPABASE_ANON_KEY="sb_publishable_evHdBoLDevj1WI6vny-hPg_rTYNn1z9";
+const SUPABASE_URL="https://fmchupnkiklbxcuqinxv.supabase.co",SUPABASE_ANON_KEY="sb_publishable_evHdBoLDevj1WI6vny-hPg_rTYNn1z9";
 let sb=null,SB_ERR="";
 try{if(!/YOUR_SUPABASE/.test(SUPABASE_URL+SUPABASE_ANON_KEY)){if(typeof supabase==="undefined")throw new Error("The Supabase library could not be downloaded. Check your internet connection or ad blocker, and open this file in a normal browser tab (not a preview pane).");sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}}catch(e){SB_ERR=e.message}
 window.addEventListener("error",e=>{const m=document.getElementById("am");if(m&&!USER){m.style.color="var(--bad)";m.textContent="Error: "+e.message}});
 let USER=null,SNAP=new Map(),busy=false,dirty=false;
 const setSync=t=>{$("#sync").textContent=t};
-const toRow=x=>({id:x.id,user_id:USER.id,flight_date:x.date||new Date().toISOString().slice(0,10),env:x.env==="Simulator"?"Simulator":"Real",type:x.type||"",reg:x.reg||"",dep:x.dep||"",arr:x.arr||"",route:x.route||"",pic:x.pic||"",sic:x.sic||"",instr:x.instr||"",crew:x.crew||"",flt:x.flt||"",mission:x.mission||"",tot:+x.tot||0,pic_h:+x.picH||0,sic_h:+x.sicH||0,dual:+x.dual||0,night:+x.night||0,xc:+x.xc||0,ifr:+x.ifr||0,ldg_d:+x.ldgD||0,ldg_n:+x.ldgN||0,remarks:x.rem||"",is_sample:!!x.sample});
-const fromRow=r=>({id:r.id,date:r.flight_date||"",env:r.env,type:r.type,reg:r.reg,dep:r.dep,arr:r.arr,route:r.route,pic:r.pic,sic:r.sic,instr:r.instr,crew:r.crew,flt:r.flt,mission:r.mission,tot:+r.tot,picH:+r.pic_h,sicH:+r.sic_h,dual:+r.dual,night:+r.night,xc:+r.xc,ifr:+r.ifr,ldgD:r.ldg_d,ldgN:r.ldg_n,rem:r.remarks,sample:r.is_sample||undefined});
+const toRow=x=>({id:x.id,user_id:USER.id,flight_date:x.date||new Date().toISOString().slice(0,10),env:x.env==="Simulator"?"Simulator":"Real",type:x.type||"",reg:x.reg||"",dep:x.dep||"",arr:x.arr||"",route:x.route||"",pic:x.pic||"",sic:x.sic||"",instr:x.instr||"",crew:x.crew||"",flt:x.flt||"",mission:x.mission||"",tot:+x.tot||0,pic_h:+x.picH||0,sic_h:+x.sicH||0,dual:+x.dual||0,night:+x.night||0,xc:+x.xc||0,ifr:+x.ifr||0,ldg_d:+x.ldgD||0,ldg_n:+x.ldgN||0,app_day:+x.apD||0,app_night:+x.apN||0,holds:+x.holds||0,off_block:x.offB||"",on_block:x.onB||"",scenario:x.scen||"",remarks:x.rem||"",is_sample:!!x.sample});
+const fromRow=r=>({id:r.id,date:r.flight_date||"",env:r.env,type:r.type,reg:r.reg,dep:r.dep,arr:r.arr,route:r.route,pic:r.pic,sic:r.sic,instr:r.instr,crew:r.crew,flt:r.flt,mission:r.mission,tot:+r.tot,picH:+r.pic_h,sicH:+r.sic_h,dual:+r.dual,night:+r.night,xc:+r.xc,ifr:+r.ifr,ldgD:r.ldg_d,ldgN:r.ldg_n,apD:r.app_day||0,apN:r.app_night||0,holds:r.holds||0,offB:r.off_block||"",onB:r.on_block||"",scen:r.scenario||"",rem:r.remarks,sample:r.is_sample||undefined});
 const snap=()=>new Map(S.map(x=>[x.id,JSON.stringify(toRow(x))]));
 // Called after every change: upserts new/edited flights and deletes removed ones.
 async function save(){
  if(!sb||!USER)return;if(busy){dirty=true;return}busy=true;
  try{
-  const cur=snap(),up=S.filter(x=>SNAP.get(x.id)!==cur.get(x.id)).map(toRow),del=[...SNAP.keys()].filter(id=>!cur.has(id));
+  try{localStorage.setItem("tl.cache."+USER.id,JSON.stringify(S))}catch(_){}const cur=snap(),up=S.filter(x=>SNAP.get(x.id)!==cur.get(x.id)).map(toRow),del=[...SNAP.keys()].filter(id=>!cur.has(id));
   if(up.length||del.length)setSync("Saving…");
   for(let i=0;i<up.length;i+=200){const{error}=await sb.from("flights").upsert(up.slice(i,i+200),{onConflict:"user_id,id"});if(error)throw error}
   if(del.length){const{error}=await sb.from("flights").delete().in("id",del);if(error)throw error}
-  SNAP=cur;if(up.length||del.length)setSync("Saved to cloud");
- }catch(e){setSync("Sync failed: "+(e.message||e))}
+  SNAP=cur;try{localStorage.removeItem("tl.pend."+USER.id)}catch(_){}if(up.length||del.length)setSync("Saved to cloud");
+ }catch(e){const c2=snap(),pu=S.filter(x=>SNAP.get(x.id)!==c2.get(x.id)).map(toRow),pd=[...SNAP.keys()].filter(id=>!c2.has(id));try{localStorage.setItem("tl.pend."+USER.id,JSON.stringify({up:pu,del:pd}))}catch(_){}setSync("⏳ "+(pu.length+pd.length)+" change(s) pending – will retry automatically")}
  busy=false;if(dirty){dirty=false;save()}
 }
 async function loadFlights(){
  setSync("Loading…");const out=[];
- for(let f=0;;f+=1000){const{data,error}=await sb.from("flights").select("*").order("flight_date",{ascending:false}).range(f,f+999);if(error){setSync("Load failed: "+error.message);return}out.push(...data);if(data.length<1000)break}
+ for(let f=0;;f+=1000){const{data,error}=await sb.from("flights").select("*").order("flight_date",{ascending:false}).range(f,f+999);if(error){const c=localStorage.getItem("tl.cache."+USER.id);if(c){try{S=JSON.parse(c);SNAP=snap();render();setSync("⚠ Offline – showing your last saved copy");return}catch(_){}}setSync("Load failed: "+error.message);return}out.push(...data);if(data.length<1000)break}
  S=out.map(fromRow);SNAP=snap();setSync("Synced");render();
 }
 function authMsg(t,ok){const m=$("#am");m.textContent=t;m.style.color=ok?"var(--ok)":"var(--bad)"}
-function applySession(s){USER=s?s.user:null;$("#auth").hidden=!!USER;$("#app").hidden=!USER;$("#so").title=USER?USER.email:"";if(USER)loadFlights();else{S=[];SNAP=new Map();render()}}
+function applySession(s){USER=s?s.user:null;$("#auth").hidden=!!USER;$("#app").hidden=!USER;$("#so").title=USER?USER.email:"";if(USER)loadAll();else{S=[];F=[];AC=[];LC=[];DOCS={};DOCS_READY=false;PROF=null;SNAP=new Map();render()}}
 async function boot(){
  if(!sb){$("#auth").hidden=false;authMsg(SB_ERR||"Add your SUPABASE_URL and SUPABASE_ANON_KEY at the top of the script, then reload.");return}
  try{const{data,error}=await sb.auth.getSession();if(error)throw error;authMsg("");applySession(data.session);
@@ -261,7 +275,7 @@ function renderOpts(){
 function filtered(){
  const q=$("#q").value.trim().toLowerCase(),e=$("#fe").value,t=$("#ft").value,c=$("#fc").value,a=$("#fa").value,d1=$("#d1").value,d2=$("#d2").value;
  return S.filter(x=>{
-  if(e&&x.env!==e)return false;if(t&&x.type!==t)return false;
+  if(e&&x.env!==e)return false;if(regF&&x.reg!==regF)return false;if(t&&x.type!==t)return false;
   if(c&&!crewOf(x).includes(c))return false;if(a&&!codes(x).includes(a))return false;
   if(d1&&x.date<d1)return false;if(d2&&x.date>d2)return false;
   if(q){const h=[x.rem,x.flt,x.reg,x.type,x.mission,x.pic,x.sic,x.instr,x.crew,x.dep,x.arr,x.route,x.env].join(" ").toLowerCase();return q.split(/\s+/).every(w=>h.includes(w))}
@@ -274,13 +288,13 @@ function renderLog(){
  const act=x=>`<button data-e="${x.id}">Edit</button> <button class="d" data-x="${x.id}">Delete</button>`;
  const crew=x=>[x.pic&&"PIC: "+x.pic,x.sic&&"SIC: "+x.sic,x.instr&&"Instr: "+x.instr,x.crew].filter(Boolean).map(esc).join("<br>");
  $("#tbl").innerHTML=`<tr><th>Date</th><th>Env</th><th>Aircraft</th><th>Route</th><th>Flight</th><th>Crew</th><th class="n">Total</th><th class="n">PIC</th><th class="n">SIC</th><th class="n">Dual</th><th class="n">Night</th><th class="n">XC</th><th class="n">IFR</th><th class="n">D/N ldg</th><th>Remarks</th><th></th></tr>`+
- L.map(x=>`<tr><td>${esc(x.date)}</td><td><span class="pill ${x.env}">${x.env==="Real"?"Flight":"Sim"}</span></td><td>${th(x)}<b>${esc(x.type)}</b><div class="mut">${esc(x.reg)}</div></td><td><b>${esc(x.dep)}</b> → <b>${esc(x.arr)}</b><div class="mut">${esc(x.route)}</div></td><td>${esc(x.flt)}<div class="mut">${esc(x.mission)}</div></td><td class="mut">${crew(x)}</td><td class="n"><b>${f1(x.tot)}</b></td><td class="n">${f1(x.picH)}</td><td class="n">${f1(x.sicH)}</td><td class="n">${f1(x.dual)}</td><td class="n">${f1(x.night)}</td><td class="n">${f1(x.xc)}</td><td class="n">${f1(x.ifr)}</td><td class="n">${x.ldgD||0}/${x.ldgN||0}</td><td class="mut" style="min-width:160px">${esc(x.rem)}</td><td style="white-space:nowrap">${act(x)}</td></tr>`).join("");
+ L.map(x=>`<tr><td>${esc(x.date)}</td><td><span class="pill ${x.env}">${x.env==="Real"?"Flight":"Sim"}</span></td><td>${th(x)}<b>${esc(x.type)}</b><div class="mut">${esc(x.reg)}</div></td><td><b>${esc(x.dep)}</b> → <b>${esc(x.arr)}</b><div class="mut">${esc(x.route)}</div></td><td>${esc(x.flt)}<div class="mut">${esc(x.mission)}</div><div class="mut">${[x.offB&&x.onB?x.offB+"–"+x.onB:"",(x.apD||x.apN)?`${x.apD||0}D/${x.apN||0}N appr`:"",x.holds?x.holds+" hold":"",x.scen].filter(Boolean).map(esc).join(" · ")}</div></td><td class="mut">${crew(x)}</td><td class="n"><b>${f1(x.tot)}</b></td><td class="n">${f1(x.picH)}</td><td class="n">${f1(x.sicH)}</td><td class="n">${f1(x.dual)}</td><td class="n">${f1(x.night)}</td><td class="n">${f1(x.xc)}</td><td class="n">${f1(x.ifr)}</td><td class="n">${x.ldgD||0}/${x.ldgN||0}</td><td class="mut" style="min-width:160px">${esc(x.rem)}</td><td style="white-space:nowrap">${act(x)}</td></tr>`).join("");
  $("#cards").innerHTML=L.map(x=>`<div class="fc"><div class="top"><span class="mut">${esc(x.date)} · ${esc(x.flt||x.mission)}</span><span class="pill ${x.env}">${x.env==="Real"?"Flight":"Simulator"}</span></div>
  <div class="rt">${esc(x.dep||"—")} → ${esc(x.arr||"—")}</div><div class="mut">${th(x)}${esc(x.type)} ${esc(x.reg)}${x.route?" · "+esc(x.route):""}</div>
  <div class="hr"><span>Total <b>${f1(x.tot)}</b></span><span>PIC <b>${f1(x.picH)}</b></span><span>SIC <b>${f1(x.sicH)}</b></span><span>Dual <b>${f1(x.dual)}</b></span><span>Night <b>${f1(x.night)}</b></span><span>XC <b>${f1(x.xc)}</b></span><span>IFR <b>${f1(x.ifr)}</b></span><span>Ldg <b>${x.ldgD||0}D/${x.ldgN||0}N</b></span></div>
  <div class="mut">${crew(x).replace(/<br>/g," · ")}</div>${x.rem?`<div style="margin:6px 0">${esc(x.rem)}</div>`:""}<div class="btns" style="margin-top:8px">${act(x)}</div></div>`).join("");
 }
-function render(){renderKPI();renderOpts();renderLog();renderFleet();renderSum();renderAn();renderLic();save();saveF();saveL()}
+function render(){renderKPI();renderOpts();renderLog();renderFleet();renderSum();renderAn();renderLic();renderWelcome();renderGoal();renderCurr();renderIns();renderPre();if(!$("#p-hub").hidden)renderHub();save();saveF();saveL()}
 
 const dlg=$("#dlg"),frm=$("#frm");let editId=null;
 function openForm(x){
@@ -301,7 +315,7 @@ document.addEventListener("click",e=>{
  if(b.dataset.x){if(b.dataset.arm){S=S.filter(x=>x.id!==b.dataset.x);render()}else{document.querySelectorAll("[data-x]").forEach(n=>{n.dataset.arm="";n.textContent="Delete"});b.dataset.arm="1";b.textContent="Sure?"}}
 });
 ["#q","#fe","#ft","#fc","#fa","#d1","#d2"].forEach(s=>$(s).addEventListener("input",renderLog));
-$("#rs").onclick=()=>{["#q","#fe","#ft","#fc","#fa","#d1","#d2"].forEach(s=>$(s).value="");renderLog()};
+$("#rs").onclick=()=>{["#q","#fe","#ft","#fc","#fa","#d1","#d2"].forEach(s=>$(s).value="");regF="";renderLog();renderPre()};
 $("#smp").onclick=()=>{S=S.filter(x=>!x.sample).concat(sample());render()};
 $("#clr").onclick=()=>{S=S.filter(x=>!x.sample);render()};
 $("#thm").onclick=()=>{const r=document.documentElement,d=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme:dark)").matches);r.dataset.theme=d?"light":"dark"};
@@ -335,9 +349,9 @@ $("#imp").onclick=()=>{
 // ---- Fleet ----
 const FK="terbanglah.fleet.v1";
 let F=[],AC=[],curF="",acEdit=null,flEdit=null,acImg="";
-function seedF(){const a={id:uid(),name:"Airline fleet"},b={id:uid(),name:"Flying club"};F=[a,b];const m=(f,type,reg)=>({id:uid(),fleetId:f.id,type,reg,note:"",img:""});AC=[m(a,"B737-800","9M-LNA"),m(a,"A320","9M-AGB"),m(b,"C172","9M-TFA"),m(b,"C172","9M-TFB")]}
+function seedF(){F=[];AC=[];return;const a={id:uid(),name:"Airline fleet"},b={id:uid(),name:"Flying club"};F=[a,b];const m=(f,type,reg)=>({id:uid(),fleetId:f.id,type,reg,note:"",img:""});AC=[m(a,"B737-800","9M-LNA"),m(a,"A320","9M-AGB"),m(b,"C172","9M-TFA"),m(b,"C172","9M-TFB")]}
 try{const j=JSON.parse(localStorage.getItem(FK));if(j&&j.fleets){F=j.fleets;AC=(j.aircraft||[]).map(a=>({...a,img:""}))}else seedF()}catch(e){seedF()}
-function saveF(){try{localStorage.setItem(FK,JSON.stringify({fleets:F,aircraft:AC}));$("#fm").textContent=""}catch(e){$("#fm").textContent="Storage is full. Export a backup and use smaller photos."}}
+function saveF(){docSave("fleet",{fleets:F,aircraft:AC});try{localStorage.setItem(FK,JSON.stringify({fleets:F,aircraft:AC}));$("#fm").textContent=""}catch(e){$("#fm").textContent="Storage is full. Export a backup and use smaller photos."}}
 const toJSON=()=>JSON.stringify({flights:S,fleets:F,aircraft:AC,licences:LC},null,1);
 function mergeFleet(t,rep){try{if(t.trim()[0]!=="{")return;const j=JSON.parse(t);if(j.licences){const li=new Set(rep?[]:LC.map(l=>l.id));LC=(rep?[]:LC).concat(j.licences.filter(l=>!li.has(l.id)))}if(!j.fleets)return;if(rep){F=j.fleets;AC=j.aircraft||[]}else{const fi=new Set(F.map(f=>f.id)),ai=new Set(AC.map(a=>a.id));F=F.concat(j.fleets.filter(f=>!fi.has(f.id)));AC=AC.concat((j.aircraft||[]).filter(a=>!ai.has(a.id)))}}catch(e){}}
 const regKey=s=>(s||"").trim().toLowerCase();
@@ -350,14 +364,14 @@ function renderFleet(){
   return `<div class="ac"><div class="im"><span>✈</span></div><div class="bd2"><div class="rt">${esc(a.type)}</div><div class="mut">${esc(a.reg)} · ${esc(f?f.name:"")}</div><div class="hr"><span><b>${f1(t.tot)}</b> h</span><span><b>${t.n}</b> flights</span>${last?`<span>last ${last}</span>`:""}</div>${a.note?`<div class="mut">${esc(a.note)}</div>`:""}<div class="btns" style="margin-top:8px"><button data-ae="${a.id}">Edit</button><button class="d" data-ax="${a.id}">Delete</button></div></div></div>`}).join("")||`<div class="empty">${F.length?"No aircraft here yet. Tap “Add aircraft”.":"Create a fleet to get started."}</div>`;
 }
 function fillPick(o){const s=$("#fpick");s.innerHTML=`<option value="">— Type manually —</option>`+AC.map(a=>{const f=F.find(f=>f.id===a.fleetId);return `<option value="${a.id}">${esc(f?f.name+" · ":"")}${esc(a.type)} ${esc(a.reg)}</option>`}).join("");const m=o.reg&&AC.find(a=>regKey(a.reg)===regKey(o.reg));s.value=m?m.id:""}
-$("#fpick").onchange=e=>{const a=AC.find(a=>a.id===e.target.value);if(a){frm.elements.type.value=a.type;frm.elements.reg.value=a.reg}};
+$("#fpick").onchange=e=>{const a=AC.find(a=>a.id===e.target.value);if(a){frm.elements.type.value=a.type;frm.elements.reg.value=a.reg;if(a.env)frm.elements.env.value=a.env}};
 const fld=$("#fld"),acd=$("#acd");
 function openFl(f){flEdit=f?f.id:null;$("#fln").value=f?f.name:"";fld.showModal()}
 $("#nf").onclick=()=>openFl();$("#rn").onclick=()=>openFl(F.find(f=>f.id===curF));$("#flx").onclick=()=>fld.close();
 $("#fls").onclick=()=>{const n=$("#fln").value.trim();if(!n)return;if(flEdit)F.find(f=>f.id===flEdit).name=n;else{const f={id:uid(),name:n};F.push(f);curF=f.id}fld.close();render()};
-function openAc(a){if(!F.length){openFl();return}acEdit=a?a.id:null;$("#acti").textContent=a?"Edit aircraft":"Add aircraft";$("#acf").innerHTML=F.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("");$("#acf").value=a?a.fleetId:(curF||F[0].id);$("#act").value=a?a.type:"";$("#acr").value=a?a.reg:"";$("#acn").value=a?a.note:"";acd.showModal()}
+function openAc(a){if(!F.length){openFl();return}acEdit=a?a.id:null;$("#acti").textContent=a?"Edit aircraft":"Add aircraft";$("#acf").innerHTML=F.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("");$("#acf").value=a?a.fleetId:(curF||F[0].id);$("#act").value=a?a.type:"";$("#acr").value=a?a.reg:"";$("#acn").value=a?a.note:"";$("#acv").value=(a&&a.env)||"Real";acd.showModal()}
 $("#na").onclick=()=>openAc();$("#acx").onclick=()=>acd.close();
-$("#acs").onclick=()=>{const type=$("#act").value.trim();if(!type){$("#act").focus();return}const o={fleetId:$("#acf").value,type,reg:$("#acr").value.trim(),note:$("#acn").value.trim(),img:acImg};if(acEdit)Object.assign(AC.find(a=>a.id===acEdit),o);else AC.push(Object.assign({id:uid()},o));acd.close();render()};
+$("#acs").onclick=()=>{const type=$("#act").value.trim();if(!type){$("#act").focus();return}const o={fleetId:$("#acf").value,type,reg:$("#acr").value.trim(),note:$("#acn").value.trim(),env:$("#acv").value,img:acImg};if(acEdit)Object.assign(AC.find(a=>a.id===acEdit),o);else AC.push(Object.assign({id:uid()},o));acd.close();render()};
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
  if("fc" in d){curF=d.fc;renderFleet()}
  if(d.ae)openAc(AC.find(a=>a.id===d.ae));
@@ -365,8 +379,8 @@ document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)r
  if(d.fdel){if(d.arm){AC=AC.filter(a=>a.fleetId!==curF);F=F.filter(f=>f.id!==curF);curF="";render()}else{d.arm="1";b.textContent="Delete fleet and its aircraft?"}}
 });
 // ---- Tabs, summary, analytics ----
-const TABS=[["sum","◉","Summary"],["lg","☰","Logbook"],["fl","✈","Fleet"],["lc","★","Licences"],["an","▤","Stats"],["dt","⇅","Data"]];
-function tab(k){TABS.forEach(([t])=>{$("#p-"+t).hidden=t!==k});document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===k));scrollTo(0,0)}
+const TABS=[["sum","◉","Summary"],["hub","◎","Hub"],["lg","☰","Logbook"],["fl","✈","Fleet"],["lc","★","Licences"],["an","▤","Stats"],["bd","♛","Board"],["dt","⇅","Data"]];
+function tab(k){TABS.forEach(([t])=>{$("#p-"+t).hidden=t!==k});document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===k));scrollTo(0,0);if(k==="hub")setTimeout(renderHub,30);if(k==="bd"&&sb&&USER)loadBoard()}
 $("#tabs").innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}"><i>${i}</i>${l}</button>`).join("");
 document.addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(b)tab(b.dataset.t)});
 $("#kpis").onclick=e=>{const c=e.target.closest(".kpi");if(!c)return;$("#fe").value=c.classList.contains("r")?"Real":c.classList.contains("s")?"Simulator":"";renderLog();tab("lg")};
@@ -382,9 +396,9 @@ function renderSum(){
  $("#rec").innerHTML=L.slice(0,5).map(x=>`<div class="rr"><div><b>${esc(x.dep||"—")} → ${esc(x.arr||"—")}</b><div class="mut">${esc(x.date)} · ${esc(x.type)} ${esc(x.reg)}</div></div><div style="text-align:right"><b>${f1(x.tot)}</b> h<div><span class="pill ${x.env}">${x.env==="Real"?"Flight":"Sim"}</span></div></div></div>`).join("")+`<button data-t="lg" style="margin-top:10px">View full logbook →</button>`;
  const rl=inD(R,90),dl=rl.reduce((s,x)=>s+(+x.ldgD||0),0),nl=rl.reduce((s,x)=>s+(+x.ldgN||0),0),last=L.find(x=>x.env==="Real");
  const row=(a,b,ok)=>`<div class="rr"><span>${a}</span><b class="${ok===undefined?"":ok?"gd":"bdc"}">${b}</b></div>`;
- $("#cur").innerHTML=row("Last 30 days",f1(A(inD(S,30)).tot)+" h")+row("Last 90 days",f1(A(inD(S,90)).tot)+" h")+row("Last 12 months",f1(A(inD(S,365)).tot)+" h")+row("Flight landings, 90 days",`${dl} day · ${nl} night`)+row("3 day landings in 90 days",dl>=3?"Met":(3-dl)+" to go",dl>=3)+row("3 night landings in 90 days",nl>=3?"Met":(3-nl)+" to go",nl>=3)+row("Last flight",last?days(last.date)+" days ago":"—")+`<div class="mut" style="margin-top:8px">Three landings in 90 days is a common passenger-carrying rule. Check your own authority’s requirements.</div>`;
+ window.__c=row("Last 30 days",f1(A(inD(S,30)).tot)+" h")+row("Last 90 days",f1(A(inD(S,90)).tot)+" h")+row("Last 12 months",f1(A(inD(S,365)).tot)+" h")+row("Flight landings, 90 days",`${dl} day · ${nl} night`)+row("3 day landings in 90 days",dl>=3?"Met":(3-dl)+" to go",dl>=3)+row("3 night landings in 90 days",nl>=3?"Met":(3-nl)+" to go",nl>=3)+row("Last flight",last?days(last.date)+" days ago":"—")+`<div class="mut" style="margin-top:8px">Three landings in 90 days is a common passenger-carrying rule. Check your own authority’s requirements.</div>`;
  const p=Math.min(100,T.tot/GT*100),pm=A(inD(S,365)).tot/12;
- $("#goal").innerHTML=`<div class="row2"><span>${f1(T.tot)} / ${GT} h</span><b>${p.toFixed(0)}%</b></div><div class="bar"><i style="width:${p}%;background:var(--acc)"></i></div><div class="mut" style="margin:8px 0">${T.tot>=GT?"Goal reached!":f1(GT-T.tot)+" h to go"+(pm>0?` · about ${Math.ceil((GT-T.tot)/pm)} months at your 12-month pace (${f1(pm)} h/mo)`:"")}</div>`+[100,250,500,1000,1500,2000,3000,5000].map(m=>`<span class="ms${T.tot>=m?" on":""}">${m} h</span>`).join("")+`<label style="margin-top:12px">Target total hours</label><input type="number" id="gt" value="${GT}" min="1">`;
+ window.__g=`<div class="row2"><span>${f1(T.tot)} / ${GT} h</span><b>${p.toFixed(0)}%</b></div><div class="bar"><i style="width:${p}%;background:var(--acc)"></i></div><div class="mut" style="margin:8px 0">${T.tot>=GT?"Goal reached!":f1(GT-T.tot)+" h to go"+(pm>0?` · about ${Math.ceil((GT-T.tot)/pm)} months at your 12-month pace (${f1(pm)} h/mo)`:"")}</div>`+[100,250,500,1000,1500,2000,3000,5000].map(m=>`<span class="ms${T.tot>=m?" on":""}">${m} h</span>`).join("")+`<label style="margin-top:12px">Target total hours</label><input type="number" id="gt" value="${GT}" min="1">`;
 }
 function renderAn(){
  const ms=[],now=new Date();for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);ms.push({k:d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"),l:d.toLocaleString("en",{month:"short"}),r:0,s:0})}
@@ -402,14 +416,14 @@ function renderAn(){
 HF.forEach(n=>{const i=frm.elements[n];i.type="text";i.placeholder="h:mm"});
 const PRE_ROWS=[["2026-09-10","S","13:00","14:00","1.1-FSTD"],["2026-09-11","S","10:30","11:30","1.2-FSTD"],["2026-09-12","S2","09:00","10:00","1.4-FSTD"],["2026-09-17","9M-ITG","14:15","16:00","1.3-Flt",1.25],["2026-09-18","S","15:00","16:00","1.5-FSTD"],["2026-09-23","9M-ITG","09:30","10:30","1.6-Flt"],["2026-09-25","9M-ITG","07:50","08:50","1.7-Flt"],["2026-09-26","S","09:00","10:00","1.8-FSTD"],["2026-09-26","9M-ITG","12:25","13:25","1.10-Flt"],["2026-09-30","S","08:00","09:00","1.9-FSTD"],["2026-10-01","9M-ITI","15:00","16:00","1.11-Flt"],["2026-10-08","S","13:00","14:00","1.12-FSTD"],["2026-10-27","9M-ITI","10:45","11:45","1.13-Flt"],["2026-10-28","9M-ITI","14:30","15:30","1.14-Flt"],["2026-10-30","9M-ITI","16:00","17:00","1.15-Flt"],["2026-11-04","9M-ITH","10:45","11:55","1.16-Flt",1.17],["2026-11-04","9M-ITH","15:30","16:30","1.17-Flt"],["2026-11-05","9M-ITG","07:40","08:40","1.18-Flt"],["2026-11-05","9M-ITG","11:20","12:20","1.19-Flt"],["2026-11-12","S","09:00","10:00","1.20-FSTD"],["2026-11-13","9M-ITG","10:00","11:00","1.21-Flt"],["2026-11-14","9M-ITH","12:10","13:10","1.22-Flt"],["2026-11-17","9M-ITE","07:40","08:40","1.23-Flt"],["2026-11-18","9M-ITF","12:20","13:10","1.24-Flt",0.83]];
 const PRE=PRE_ROWS.map(([d,k,o,n,c,t])=>{const sim=k[0]==="S",f=!sim,tot=t||1;return mk({id:"cbta-"+c,date:d,env:sim?"Simulator":"Real",type:k==="S"?"DA40TDI":"DA40NG",reg:sim?(k==="S2"?"DSIM DA40NG (SIM 2)":"DSIM DA40TDI (SIM 1)"):k,dep:f?"WMKM":"",arr:f?"WMKM":"",route:`Block ${o}–${n}`,pic:f?"Capt Shahrizan (EXCEL 09)":"",flt:c,mission:"MPL Core CBTA",tot,dual:f?tot:0,ldgD:f?1:0,rem:`MPL Core CBTA Combined Syllabus / COR ${c} / EXCEL 09 CAPT SHAHRIZAN`})});
-try{if(!localStorage.getItem("tl.pre1")){
+try{if(false){
   const fl={id:"fl-da40",name:"DA40 training fleet"};F=F.filter(f=>!["Airline fleet","Flying club"].includes(f.name)).concat(fl);AC=AC.filter(a=>F.some(f=>f.id===a.fleetId));
  [["DA40NG","9M-ITE"],["DA40NG","9M-ITF"],["DA40NG","9M-ITG"],["DA40NG","9M-ITH"],["DA40NG","9M-ITI"],["DA40TDI","DSIM DA40TDI (SIM 1)"],["DA40NG","DSIM DA40NG (SIM 2)"]].forEach(([type,reg])=>AC.push({id:"ac-"+reg,fleetId:fl.id,type,reg,note:reg.startsWith("DSIM")?"Simulator":"",img:""}));
  curF="";localStorage.setItem("tl.pre1","1")}}catch(e){}
 // ---- Licences & ratings ----
 const LK="terbanglah.lic.v1";let LC=[],lcEdit=null;
 try{LC=JSON.parse(localStorage.getItem(LK))||[]}catch(e){LC=[]}
-function saveL(){try{localStorage.setItem(LK,JSON.stringify(LC))}catch(e){}}
+function saveL(){docSave("licences",LC);try{localStorage.setItem(LK,JSON.stringify(LC))}catch(e){}}
 const dleft=d=>Math.ceil((new Date(d+"T00:00:00")-new Date(new Date().toDateString()))/864e5);
 function lstat(x){if(!x.exp)return{c:"",t:"No expiry",k:3};const d=dleft(x.exp);return d<0?{c:"bdc",t:`Expired ${-d} days ago`,k:0}:d<=90?{c:"warn",t:`${d} days left`,k:1}:{c:"gd",t:`Valid · ${d} days left`,k:2}}
 const chipsOf=l=>(l||[]).length?`<div class="chips" style="margin-top:6px">${l.map(f=>`<button class="chip" data-pf="${f.id}" data-pn="${esc(f.name)}">📄 ${esc(f.name)}</button>`).join("")}</div>`:"";
@@ -423,7 +437,7 @@ function renderLic(){
 // PDF attachments stored in IndexedDB (files stay on this device)
 let lcFiles=[],lcOrig=[],pvu=null;
 const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open("terbanglah-files",1);r.onupgradeneeded=()=>r.result.createObjectStore("f");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
-const idbDo=(m,k,v)=>idb().then(db=>new Promise((res,rej)=>{const s=db.transaction("f",m==="get"?"readonly":"readwrite").objectStore("f"),q=m==="put"?s.put(v,k):m==="del"?s.delete(k):s.get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}));
+const idbLocal=(m,k,v)=>idb().then(db=>new Promise((res,rej)=>{const s=db.transaction("f",m==="get"?"readonly":"readwrite").objectStore("f"),q=m==="put"?s.put(v,k):m==="del"?s.delete(k):s.get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}));
 function lcfl(){$("#lcfl").innerHTML=lcFiles.map(f=>`<div class="rr"><span>📄 ${esc(f.name)} <span class="mut">${Math.round((f.size||0)/1024)} KB</span></span><button type="button" data-rf="${f.id}">Remove</button></div>`).join("")}
 $("#lcf").onchange=e=>{for(const f of e.target.files){if(!/pdf/i.test(f.type)&&!/\.pdf$/i.test(f.name))continue;if(f.size>15e6)continue;lcFiles.push({id:uid(),name:f.name,size:f.size,blob:f})}e.target.value="";lcfl()};
 async function showPdf(id,name){$("#pvn").textContent=name;try{const bl=await idbDo("get",id);if(!bl){$("#pvn").textContent=name+" (not found on this device)";$("#pvf").removeAttribute("src")}else{const u=URL.createObjectURL(bl);if(pvu)URL.revokeObjectURL(pvu);pvu=u;$("#pvf").src=u;$("#pvo").href=u}}catch(e){$("#pvn").textContent=name+" (could not open)"}$("#pvd").showModal()}
@@ -443,6 +457,109 @@ document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)r
  if(d.le)openLc(LC.find(x=>x.id===d.le));
  if(d.lx){if(d.arm){((l=>[...(l?.files||[]),...(l?.history||[]).flatMap(h=>h.files||[])])(LC.find(x=>x.id===d.lx))).forEach(f=>idbDo("del",f.id).catch(()=>{}));LC=LC.filter(x=>x.id!==d.lx);render()}else{document.querySelectorAll("[data-lx]").forEach(n=>{n.dataset.arm="";n.textContent="Delete"});d.arm="1";b.textContent="Sure?"}}
 });
+// ===== TerbangLah v2: cloud docs, hub, goals, currency, insights, presets, leaderboard, reports =====
+let DOCS={},DOCS_READY=false,SET={annual:100,presets:[]},PROF=null,BOARD=[],regF="",MAP=null,MG=null;
+const FIDS=["#q","#fe","#ft","#fc","#fa","#d1","#d2"];
+const BUILTIN=[{name:"Simulator sessions",v:{"#fe":"Simulator"}},{name:"Flights only",v:{"#fe":"Real"}},{name:"Last 30 days",v:{"#d1":"@30"}}];
+const LAD=[10,25,50,100,150,200,250,500,750,1000,1500,2000,3000,4000,5000,7500,10000];
+// ---- cloud documents (fleet, licences, settings) ----
+async function docSave(key,val){if(!sb||!USER||!DOCS_READY)return;const j=JSON.stringify(val);if(DOCS[key]===j)return;try{const{error}=await sb.from("user_docs").upsert({user_id:USER.id,key,value:val},{onConflict:"user_id,key"});if(error)throw error;DOCS[key]=j}catch(e){setSync("\u23f3 Changes pending \u2013 "+(e.message||e))}}
+function saveSet(){docSave("settings",SET)}
+async function loadDocs(){const{data,error}=await sb.from("user_docs").select("key,value");if(error)throw error;DOCS={};(data||[]).forEach(r=>{DOCS[r.key]=JSON.stringify(r.value)});const g=k=>(data||[]).find(r=>r.key===k)?.value;const fl=g("fleet");F=fl?fl.fleets||[]:[];AC=fl?fl.aircraft||[]:[];LC=g("licences")||[];SET=Object.assign({annual:100,presets:[]},g("settings")||{});curF=""}
+async function flushPend(){try{const k="tl.pend."+USER.id,p=JSON.parse(localStorage.getItem(k)||"null");if(!p)return;if(p.up&&p.up.length){const{error}=await sb.from("flights").upsert(p.up,{onConflict:"user_id,id"});if(error)throw error}if(p.del&&p.del.length){const{error}=await sb.from("flights").delete().in("id",p.del);if(error)throw error}localStorage.removeItem(k)}catch(e){}}
+async function loadProfile(){try{const{data}=await sb.from("profiles").select("*").maybeSingle();PROF=data||null;$("#bn").value=PROF?PROF.display_name:"";$("#bs").checked=PROF?PROF.show_on_leaderboard:true}catch(e){}render()}
+async function loadAll(){setSync("Loading\u2026");await flushPend();try{await loadDocs();DOCS_READY=true}catch(e){setSync("Could not load fleet/licences: "+(e.message||e))}await loadFlights();loadProfile()}
+window.addEventListener("online",()=>{setSync("Back online \u2013 syncing\u2026");save();saveF();saveL();saveSet()});
+window.addEventListener("offline",()=>setSync("\u23f3 Offline \u2013 changes will sync when you reconnect"));
+setInterval(()=>{if(USER&&navigator.onLine){save();saveF();saveL();saveSet()}},20000);
+// ---- cloud PDFs (Supabase Storage, private bucket "documents") ----
+async function idbDo(m,k,v){const path=USER?USER.id+"/"+k:null;
+ if(m==="put"){await idbLocal("put",k,v);if(sb&&path){const{error}=await sb.storage.from("documents").upload(path,v,{upsert:true,contentType:"application/pdf"});if(error)throw error}return}
+ if(m==="del"){try{await idbLocal("del",k)}catch(e){}if(sb&&path)await sb.storage.from("documents").remove([path]);return}
+ let bl=null;try{bl=await idbLocal("get",k)}catch(e){}
+ if(!bl&&sb&&path){const{data,error}=await sb.storage.from("documents").download(path);if(error)throw error;bl=data;try{await idbLocal("put",k,bl)}catch(e){}}
+ return bl}
+// ---- airports & geometry ----
+const AP={};"WMKK|KUL|2.7456|101.7099|Kuala Lumpur;WMSA|SZB|3.1306|101.5489|Subang;WMKM|MKZ|2.2634|102.2516|Malacca;WMKL|LGK|6.3297|99.7287|Langkawi;WMKP|PEN|5.2971|100.2770|Penang;WMKI|IPH|4.5680|101.0920|Ipoh;WMKJ|JHB|1.6413|103.6697|Johor Bahru;WMKB|BWH|5.4659|100.3910|Butterworth;WMKD|KUA|3.7754|103.2090|Kuantan;WMKC|KBR|6.1669|102.2930|Kota Bharu;WMKN|TGG|5.3826|103.1030|Kuala Terengganu;WMKA|AOR|6.1897|100.3980|Alor Setar;WBKK|BKI|5.9372|116.0510|Kota Kinabalu;WBGG|KCH|1.4847|110.3470|Kuching;WBGR|MYY|4.3220|113.9870|Miri;WBGB|BTU|3.1239|113.0200|Bintulu;WBKS|SDK|5.9009|118.0590|Sandakan;WBKW|TWU|4.3133|118.1220|Tawau;WBKL|LBU|5.3007|115.2500|Labuan;WSSS|SIN|1.3502|103.9940|Singapore Changi;WSSL|XSP|1.4168|103.8680|Seletar;WIII|CGK|-6.1256|106.6560|Jakarta;WIDD|BTH|1.1210|104.1190|Batam;WADD|DPS|-8.7482|115.1670|Bali;WIMM|KNO|3.5580|98.6717|Medan;VTBS|BKK|13.6900|100.7501|Bangkok;VTBD|DMK|13.9126|100.6067|Don Mueang;VTSP|HKT|8.1132|98.3169|Phuket;VTSS|HDY|6.9332|100.3930|Hat Yai;VTCC|CNX|18.7668|98.9626|Chiang Mai;VVTS|SGN|10.8188|106.6520|Ho Chi Minh City;VVNB|HAN|21.2212|105.8070|Hanoi;VDPP|PNH|11.5466|104.8440|Phnom Penh;VYYY|RGN|16.9073|96.1332|Yangon;RPLL|MNL|14.5086|121.0190|Manila;VHHH|HKG|22.3089|113.9150|Hong Kong;RCTP|TPE|25.0777|121.2330|Taipei;ZGGG|CAN|23.3924|113.2990|Guangzhou;ZSPD|PVG|31.1434|121.8050|Shanghai;ZBAA|PEK|40.0801|116.5980|Beijing;RJTT|HND|35.5523|139.7800|Tokyo Haneda;RJAA|NRT|35.7647|140.3860|Tokyo Narita;RKSI|ICN|37.4602|126.4400|Seoul;VIDP|DEL|28.5562|77.1000|Delhi;VABB|BOM|19.0887|72.8679|Mumbai;VCBI|CMB|7.1808|79.8841|Colombo;OMDB|DXB|25.2528|55.3644|Dubai;OTHH|DOH|25.2731|51.6081|Doha;OEJN|JED|21.6796|39.1565|Jeddah;EGLL|LHR|51.4700|-0.4543|London Heathrow;YSSY|SYD|-33.9399|151.1750|Sydney;YMML|MEL|-37.6733|144.8430|Melbourne;YPPH|PER|-31.9403|115.9670|Perth".split(";").forEach(r=>{const[i,a,la,lo,n]=r.split("|");AP[i]=AP[a]=[+la,+lo,n,i]});
+const apc=c=>AP[(c||"").trim().toUpperCase()];
+const hav=(a,b)=>{const R=3440.065,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,q=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(q))};
+function routeStats(){let nm=0,est=0;const unk=new Set(),pairs={},apv={};S.filter(x=>x.env==="Real").forEach(x=>{const a=apc(x.dep),b=apc(x.arr);if(x.dep&&!a)unk.add(x.dep.toUpperCase());if(x.arr&&!b)unk.add(x.arr.toUpperCase());if(a&&b){if(a[3]===b[3])est+=(+x.tot||0)*100;else nm+=hav(a,b);const k=a[3]+"\u2192"+b[3];pairs[k]=pairs[k]||{n:0,h:0};pairs[k].n++;pairs[k].h+=+x.tot||0;apv[a[3]]=(apv[a[3]]||0)+1;if(a[3]!==b[3])apv[b[3]]=(apv[b[3]]||0)+1}});return{nm,est,unk:[...unk],pairs,apv}}
+// ---- welcome ----
+function renderWelcome(){const n=(PROF&&PROF.display_name)||(USER?USER.email.split("@")[0]:"pilot"),h=new Date().getHours(),g=h<12?"Good morning":h<18?"Good afternoon":"Good evening",T=A(S);
+ $("#welcome").innerHTML=`<div class="card hero"><div class="hello">${g}, ${esc(n)} \u2708</div><div class="mut">Welcome to TerbangLah! ${T.n?`You have ${f1(T.tot)} h logged across ${T.n} flights and sessions.`:"Log your first flight to get started."} Blue skies!</div></div>`}
+// ---- automated goals & milestones ----
+function renderGoal(){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),yr=new Date().getFullYear(),Y=A(S.filter(x=>(x.date||"").startsWith(yr)));
+ const bar=([l,v])=>{const nx=LAD.find(m=>m>v)||v,pv=[...LAD].reverse().find(m=>m<=v)||0,p=nx>pv?(v-pv)/(nx-pv)*100:100;return `<div class="tb"><div class="row"><span>${l}</span><span class="mut">${f1(v)} / ${nx} h</span></div><div class="bar"><i style="width:${p}%;background:var(--acc)"></i></div></div>`};
+ const doy=Math.floor((Date.now()-new Date(yr,0,1))/864e5)+1,pace=Y.tot/doy*365,tg=SET.annual||100,pm=A(inD(S,365)).tot/12,nxt=LAD.find(m=>m>T.tot);
+ $("#goal").innerHTML=`<div class="mut" style="margin-bottom:8px">Next milestones update automatically as you log.</div>`+[["Total",T.tot],["Flight",R.tot],["Simulator",M.tot],["PIC",T.pic],["Cross-country",T.xc],["Instrument",T.ifr],["Night",T.night]].map(bar).join("")
+ +(nxt&&pm>0?`<div class="mut" style="margin:6px 0">Next total milestone (${nxt} h) in about ${Math.ceil((nxt-T.tot)/pm)} months at your 12-month pace.</div>`:"")
+ +`<div class="tb" style="margin-top:12px"><div class="row"><span>${yr} target</span><span class="mut">${f1(Y.tot)} / ${tg} h</span></div><div class="bar"><i style="width:${Math.min(100,Y.tot/tg*100)}%;background:var(--ok)"></i></div><div class="mut" style="margin-top:4px">${pace>=tg?"On track":"Behind pace"} \u2013 projected ${f1(pace)} h by year end.</div></div><label>Annual flying target (hours)</label><input type="number" id="ga" value="${tg}" min="1">`
+ +LAD.filter(m=>T.tot>=m).map(m=>`<span class="ms on">${m} h</span>`).join("")}
+document.addEventListener("change",e=>{if(e.target.id==="ga"){SET.annual=Math.max(1,+e.target.value||100);saveSet();render()}});
+// ---- currency ----
+function renderCurr(){const R=S.filter(x=>x.env==="Real"&&x.date).sort((a,b)=>b.date.localeCompare(a.date));
+ const roll=k=>{let c=0;for(const x of R){c+=+x[k]||0;if(c>=3)return 90-days(x.date)}return null};
+ const st=d=>d===null||d<0?["Due","bdc"]:d<=30?["Expiring soon","warn"]:["Current","gd"];
+ const ifr=S.filter(x=>(+x.ifr||0)>0&&x.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const it=[["Day landings (3 in 90 days)",roll("ldgD")],["Night landings (3 in 90 days)",roll("ldgN")],["Instrument (IFR flown in last 180 days)",ifr?180-days(ifr.date):null],["Flying activity (flight in last 60 days)",R[0]?60-days(R[0].date):null]];
+ $("#cur").innerHTML=it.map(([l,d])=>{const[t,c]=st(d);return `<div class="rr"><span>${l}<div class="mut">${d===null?"No qualifying activity logged":d<0?`Lapsed ${-d} days ago`:`${d} days remaining`}</div></span><b class="${c}">${t}</b></div>`}).join("")
+ +[["Last 30 days",30],["Last 90 days",90],["Last 12 months",365]].map(([l,n])=>`<div class="rr"><span>${l}</span><b>${f1(A(inD(S,n)).tot)}</b></div>`).join("")
+ +`<div class="mut" style="margin-top:8px">Indicative only \u2013 passenger-carrying and instrument currency rules differ by authority. Check yours.</div>`}
+// ---- hub ----
+function renderHub(){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),rs=routeStats(),km=(rs.nm+rs.est)*1.852,Ls=[...S].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+ $("#hubk").innerHTML=[["Total time",f1(T.tot)],["Flight time",f1(R.tot)],["Simulator",f1(M.tot)],["Distance",Math.round(km).toLocaleString()+" km"],["Airports",Object.keys(rs.apv).length],["Landings",T.ldg]].map(([l,v])=>`<div class="tile"><b>${v}</b><span>${l}</span></div>`).join("");
+ const f=[];
+ if(T.tot)f.push(`\u23f1 ${f1(T.tot)} h logged \u2013 that\u2019s ${(T.tot/24).toFixed(1)} full days of flying.`);
+ if(km)f.push(`\ud83c\udf0d You\u2019ve covered about ${Math.round(km).toLocaleString()} km (${Math.round(km/1.852).toLocaleString()} nm): ${(km/40075).toFixed(2)}\u00d7 around the Earth, or ${(km/384400*100).toFixed(1)}% of the way to the Moon.`);
+ const lf=[...S].sort((a,b)=>b.tot-a.tot)[0];if(lf&&lf.tot)f.push(`\ud83c\udfc6 Longest session: ${f1(lf.tot)} on ${esc(lf.date)}${lf.dep?` (${esc(lf.dep)} \u2192 ${esc(lf.arr)})`:""}.`);
+ const mo={};S.forEach(x=>{const k=(x.date||"").slice(0,7);if(k)mo[k]=(mo[k]||0)+(+x.tot||0)});const bm=Object.entries(mo).sort((a,b)=>b[1]-a[1])[0];if(bm)f.push(`\ud83d\udcc5 Busiest month: ${bm[0]} with ${f1(bm[1])} h.`);
+ const ty={};S.forEach(x=>{if(x.type)ty[x.type]=(ty[x.type]||0)+(+x.tot||0)});const bt=Object.entries(ty).sort((a,b)=>b[1]-a[1])[0];if(bt)f.push(`\ud83d\udee9 Favourite aircraft: ${esc(bt[0])} (${f1(bt[1])} h).`);
+ if(T.ldg)f.push(`\ud83d\udeec ${T.ldg} landings \u2013 roughly one every ${Math.round(T.tot*60/T.ldg)} minutes of flying.`);
+ if(T.tot&&T.night)f.push(`\ud83c\udf19 ${Math.round(T.night/T.tot*100)}% of your time is at night (${f1(T.night)} h).`);
+ if(T.ifr)f.push(`\u2601 ${f1(T.ifr)} h on instruments \u2013 ${Math.round(T.ifr/T.tot*100)}% of your hours.`);
+ const ar=S.reduce((s,x)=>s+(+x.apD||0)+(+x.apN||0),0),hd=S.reduce((s,x)=>s+(+x.holds||0),0);if(ar||hd)f.push(`\ud83c\udfaf ${ar} approaches and ${hd} holds logged.`);
+ if(Ls[0]&&Ls[0].date){const d=Math.max(1,days(Ls[0].date));f.push(`\ud83d\uddd3 Your logbook starts ${esc(Ls[0].date)} \u2013 ${d} days ago, about ${f1(T.tot/d*7)} h per week.`)}
+ const tp=Object.entries(rs.pairs).sort((a,b)=>b[1].n-a[1].n)[0];if(tp)f.push(`\ud83d\udccd Favourite route: ${tp[0].replace("\u2192"," \u2192 ")} (${tp[1].n} flights).`);
+ $("#facts").innerHTML=f.map(t=>`<div class="rr" style="display:block">${t}</div>`).join("")||`<div class="mut">Log some flights to unlock fun facts.</div>`;
+ $("#mapn").textContent=`${Object.keys(rs.pairs).length} routes shown. Local flights count at an estimated 100 kt.`+(rs.unk.length?` Unrecognised codes: ${rs.unk.join(", ")}.`:"");
+ drawMap(rs)}
+function drawMap(rs){const el=$("#map");if(!window.L){el.innerHTML=`<div class="empty">Map library could not load.</div>`;return}
+ if(!MAP){MAP=L.map("map",{scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"\u00a9 OpenStreetMap",maxZoom:12}).addTo(MAP);MG=L.layerGroup().addTo(MAP)}
+ MG.clearLayers();const pts=[];
+ Object.entries(rs.pairs).forEach(([k,v])=>{const[a,b]=k.split("\u2192");if(a===b)return;L.polyline([[AP[a][0],AP[a][1]],[AP[b][0],AP[b][1]]],{color:"#6366f1",weight:2+Math.min(4,v.n/2),opacity:.75}).bindPopup(`${a} \u2192 ${b}<br>${v.n} flights \u00b7 ${f1(v.h)}`).addTo(MG)});
+ Object.entries(rs.apv).forEach(([c,n])=>{const p=AP[c];pts.push([p[0],p[1]]);L.circleMarker([p[0],p[1]],{radius:5+Math.min(10,n),color:"#0d9488",fillOpacity:.8}).bindPopup(`${c} \u2013 ${p[2]}<br>${n} visits`).addTo(MG)});
+ setTimeout(()=>{MAP.invalidateSize();if(pts.length)MAP.fitBounds(pts,{padding:[30,30],maxZoom:9});else MAP.setView([4,109],5)},80)}
+// ---- stats: city pairs & crew ----
+function renderIns(){const P={};S.forEach(x=>{if(x.dep&&x.arr){const k=x.dep.toUpperCase()+" \u2192 "+x.arr.toUpperCase();P[k]=P[k]||{n:0,h:0};P[k].n++;P[k].h+=+x.tot||0}});
+ $("#troutes").innerHTML=Object.entries(P).sort((a,b)=>b[1].n-a[1].n).slice(0,8).map(([k,v])=>`<div class="rr"><span>${esc(k)}</span><b>${v.n} \u00b7 ${f1(v.h)}</b></div>`).join("")||`<div class="mut">No departure/arrival pairs logged yet.</div>`;
+ const C={};S.forEach(x=>{const m={};[[x.pic,"PIC"],[x.sic,"SIC"],[x.instr,"Instructor"],...String(x.crew||"").split(",").map(n=>[n,"Crew"])].forEach(([n,r])=>{n=(n||"").trim();if(n&&notMe(n))(m[n]=m[n]||new Set()).add(r)});Object.entries(m).forEach(([n,r])=>{const c=C[n]=C[n]||{h:0,n:0,r:new Set(),last:""};c.h+=+x.tot||0;c.n++;r.forEach(v=>c.r.add(v));if((x.date||"")>c.last)c.last=x.date})});
+ $("#crewt").innerHTML=`<table class="bd"><tr><th>Name</th><th>Role</th><th>Flights</th><th>Hours</th><th>Last</th></tr>`+Object.entries(C).sort((a,b)=>b[1].h-a[1].h).map(([n,c])=>`<tr><td>${esc(n)}</td><td>${[...c.r].join(", ")}</td><td>${c.n}</td><td>${f1(c.h)}</td><td>${esc(c.last)}</td></tr>`).join("")+`</table>`}
+// ---- saved views & tail quick-jump ----
+function curView(){const v={regF};FIDS.forEach(s=>v[s]=$(s).value);return v}
+function applyView(v){regF=v.regF||"";FIDS.forEach(s=>{$(s).value=v[s]||""});if(v["#d1"]==="@30")$("#d1").value=new Date(Date.now()-30*864e5).toISOString().slice(0,10);renderLog();renderPre()}
+function renderPre(){const U=SET.presets||[];$("#pre").innerHTML=BUILTIN.concat(U).map((p,i)=>`<span style="display:inline-flex;gap:2px"><button class="chip" data-pv="${i}">${esc(p.name)}</button>${i>=BUILTIN.length?`<button class="chip del" data-pd="${i-BUILTIN.length}" title="Delete view">\u2715</button>`:""}</span>`).join("")+`<input id="pn" placeholder="Name this view\u2026" style="width:150px;min-height:34px"><button id="psv">Save view</button>`;
+ const regs=uniq([...S.map(x=>x.reg),...AC.map(a=>a.reg)].filter(Boolean));$("#qj").innerHTML=`<span class="mut" style="align-self:center">Aircraft:</span><button class="chip${regF?"":" on"}" data-qj="">All</button>`+regs.map(r=>`<button class="chip${regF===r?" on":""}" data-qj="${esc(r)}">${esc(r)}</button>`).join("")}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+ if(d.pv!==undefined)applyView(BUILTIN.concat(SET.presets||[])[+d.pv].v);
+ if(d.pd!==undefined){SET.presets.splice(+d.pd,1);saveSet();renderPre()}
+ if(d.qj!==undefined){regF=d.qj;renderLog();renderPre()}
+ if(b.id==="psv"){const n=$("#pn").value.trim();if(!n)return;SET.presets=(SET.presets||[]).concat({name:n,v:curView()});saveSet();renderPre()}});
+// ---- reports ----
+const toCSVL=l=>COLS.join(",")+"\n"+l.map(x=>COLS.map(c=>csvQ(x[c])).join(",")).join("\n");
+function printHTML(h){$("#pa").innerHTML=h;window.print()}
+const pname=()=>(PROF&&PROF.display_name)||(USER?USER.email:"");
+function printLog(){const L=filtered().sort((a,b)=>a.date.localeCompare(b.date)),T=A(L);
+ printHTML(`<h1>Pilot logbook \u2013 ${esc(pname())}</h1><p>Generated ${new Date().toLocaleDateString()} \u00b7 ${L.length} entries \u00b7 Total ${f1(T.tot)} \u00b7 PIC ${f1(T.pic)} \u00b7 Dual ${f1(T.dual)} \u00b7 Night ${f1(T.night)} \u00b7 XC ${f1(T.xc)} \u00b7 IFR ${f1(T.ifr)} \u00b7 Landings ${T.ldg}</p><table><tr><th>Date</th><th>Type</th><th>Reg</th><th>Route</th><th>Env</th><th>Total</th><th>PIC</th><th>Dual</th><th>Night</th><th>XC</th><th>IFR</th><th>Ldg</th><th>Crew</th><th>Remarks</th></tr>${L.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.reg)}</td><td>${esc(x.dep)}-${esc(x.arr)}</td><td>${x.env==="Real"?"Flight":"Sim"}</td><td>${f1(x.tot)}</td><td>${f1(x.picH)}</td><td>${f1(x.dual)}</td><td>${f1(x.night)}</td><td>${f1(x.xc)}</td><td>${f1(x.ifr)}</td><td>${(x.ldgD||0)+(x.ldgN||0)}</td><td>${esc(crewOf(x).join(", "))}</td><td>${esc(x.rem)}</td></tr>`).join("")}</table>`)}
+function printSummary(){const R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),T=A(S),ty={};S.forEach(x=>{const k=x.type||"Unknown";ty[k]=ty[k]||{r:0,s:0};ty[k][x.env==="Real"?"r":"s"]+=+x.tot||0});
+ const row=(l,k)=>`<tr><td>${l}</td><td>${f1(R[k])}</td><td>${f1(M[k])}</td><td>${f1(T[k])}</td></tr>`;
+ printHTML(`<h1>Pilot experience summary \u2013 ${esc(pname())}</h1><p>Generated ${new Date().toLocaleDateString()}</p><table><tr><th></th><th>Flight</th><th>Simulator</th><th>Total</th></tr>${[["Total time","tot"],["PIC","pic"],["SIC","sic"],["Dual","dual"],["Night","night"],["Cross-country","xc"],["Instrument","ifr"]].map(([l,k])=>row(l,k)).join("")}<tr><td>Landings</td><td>${R.ldg}</td><td>${M.ldg}</td><td>${T.ldg}</td></tr></table><h2>Hours by aircraft type</h2><table><tr><th>Type</th><th>Flight</th><th>Simulator</th></tr>${Object.entries(ty).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${f1(v.r)}</td><td>${f1(v.s)}</td></tr>`).join("")}</table><h2>Licences, ratings &amp; medical</h2><table><tr><th>Item</th><th>Number</th><th>Authority</th><th>Issued</th><th>Valid until</th></tr>${LC.map(x=>`<tr><td>${esc(x.cat)}: ${esc(x.name)}</td><td>${esc(x.no)}</td><td>${esc(x.auth)}</td><td>${esc(x.iss)}</td><td>${esc(x.exp)}</td></tr>`).join("")}</table>`)}
+$("#rp1").onclick=printLog;$("#rp2").onclick=printSummary;$("#rp3").onclick=()=>download("logbook-filtered-"+new Date().toISOString().slice(0,10)+".csv",toCSVL(filtered()),"text/csv");
+// ---- leaderboard ----
+async function loadBoard(){const el=$("#bt");el.innerHTML=`<div class="mut">Loading\u2026</div>`;const{data,error}=await sb.rpc("leaderboard");if(error){el.innerHTML=`<div class="mut">Leaderboard unavailable: ${esc(error.message)}</div>`;return}BOARD=data||[];drawBoard()}
+function drawBoard(){const m=$("#bm").value,L=[...BOARD].sort((a,b)=>b[m]-a[m]);$("#bt").innerHTML=L.length?`<table class="bd"><tr><th>#</th><th style="text-align:left">Pilot</th><th>Hours</th><th>Flights</th></tr>`+L.map((r,i)=>`<tr${r.is_me?` style="font-weight:700;background:var(--bg)"`:""}><td>${["\ud83e\udd47","\ud83e\udd48","\ud83e\udd49"][i]||i+1}</td><td style="text-align:left">${esc(r.display_name)}${r.is_me?" (you)":""}</td><td>${f1(r[m])}</td><td>${r.flights}</td></tr>`).join("")+`</table>`:`<div class="empty">No pilots on the leaderboard yet. Set a display name below to join.</div>`}
+$("#bm").onchange=drawBoard;$("#br").onclick=loadBoard;
+$("#bsave").onclick=async()=>{const n=$("#bn").value.trim(),m=$("#bmsg");if(!n){m.textContent="Enter a display name first.";return}const{error}=await sb.from("profiles").upsert({user_id:USER.id,display_name:n,show_on_leaderboard:$("#bs").checked,updated_at:new Date().toISOString()},{onConflict:"user_id"});if(error){m.textContent="Could not save: "+error.message;return}m.textContent="Profile saved.";await loadProfile();loadBoard()};
+
 tab("sum");render();boot();
 </script>
 </body>
