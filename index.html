@@ -76,6 +76,27 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 .chip.del{padding:2px 8px}#map{z-index:0}#pa{display:none}
 @media print{body>*:not(#pa){display:none!important}#pa{display:block;color:#000;background:#fff}#pa table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}#pa td,#pa th{border:1px solid #999;padding:3px;text-align:left}#pa h1{font-size:18px}}
 @media (max-width:860px){.tabs{overflow-x:auto;justify-content:flex-start}.tabs button{flex:0 0 auto;min-width:62px}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes shift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes fly{0%{transform:translate(-12vw,26px) rotate(-8deg)}100%{transform:translate(105vw,-26px) rotate(-8deg)}}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(140vw)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes dash{to{stroke-dashoffset:-32}}@keyframes blink{50%{opacity:.3}}
+.hero{position:relative;overflow:hidden;padding:30px 24px;text-transform:uppercase;letter-spacing:.05em;background:linear-gradient(120deg,var(--acc),var(--sim),#0ea5e9,var(--acc));background-size:300% 300%;animation:shift 14s ease infinite}
+.hero .hello{font-size:clamp(22px,4.2vw,34px);font-weight:800;position:relative}.hero .mut{position:relative;font-size:13px;font-weight:600}
+.hero .plane{position:absolute;top:10px;left:0;font-size:28px;animation:fly 11s linear infinite;opacity:.9}
+.cloud{position:absolute;height:26px;width:90px;border-radius:99px;background:rgba(255,255,255,.2);animation:drift 26s linear infinite}.c1{top:56px;left:-100px}.c2{top:92px;left:-130px;width:140px;opacity:.7;animation-duration:40s}
+#p-hub .tile,#p-hub .card:not(.hero){animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+#p-hub .tile:nth-child(2){animation-delay:.07s}#p-hub .tile:nth-child(3){animation-delay:.14s}#p-hub .tile:nth-child(4){animation-delay:.21s}#p-hub .tile:nth-child(5){animation-delay:.28s}#p-hub .tile:nth-child(6){animation-delay:.35s}
+#p-hub .fact{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.tile{position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s}.tile:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(79,70,229,.2)}
+.tile:before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,var(--acc),var(--sim))}
+.tile .ti{font-style:normal;position:absolute;right:10px;top:8px;font-size:22px;opacity:.3}.tile b{font-size:24px}
+.fact{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:var(--bg);transition:transform .2s}.fact:hover{transform:translateX(4px)}.fact .em{font-size:24px;line-height:1.1}
+.bar i{transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+.flow{stroke-dasharray:8 8;animation:dash 1.2s linear infinite}.pulse{animation:blink 2.2s ease-in-out infinite}
+.drop{display:block;border:2px dashed var(--acc);border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;margin-top:12px;color:var(--mut)}.drop.on{background:var(--bg)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>')</script>
@@ -95,7 +116,7 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
  </div>
 </header>
 
-<main id="p-sum" class="pg"><div id="welcome"></div><div id="lcb"></div><section class="kpis" id="kpis"></section>
+<main id="p-sum" class="pg"><section class="kpis" id="kpis"></section>
 <section class="tiles" id="tiles"></section>
 <section class="grid2">
  <div class="card"><h2>Flight vs Simulator breakdown</h2><div class="scroll"><table class="bd" id="bd"></table></div></div>
@@ -104,9 +125,11 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 <section class="grid2"><div class="card"><h2>Currency &amp; recency</h2><div id="cur"></div></div><div class="card"><h2>Career goal &amp; milestones</h2><div id="goal"></div></div></section>
 </main>
 
-<main id="p-hub" class="pg" hidden><div class="tiles" id="hubk"></div><section class="grid2"><div class="card"><h2>Route map</h2><div id="map" style="height:380px;border-radius:12px"></div><div class="mut" id="mapn" style="margin-top:6px"></div></div><div class="card"><h2>Fun facts</h2><div id="facts"></div></div></section></main>
+<main id="p-hub" class="pg" hidden><div id="welcome"></div><div id="lcb"></div><div class="tiles" id="hubk"></div><section class="grid2"><div class="card"><h2>Route map</h2><div id="map" style="height:380px;border-radius:12px"></div><div class="mut" id="mapn" style="margin-top:6px"></div></div><div class="card"><h2>Fun facts</h2><div id="facts"></div></div></section></main>
 
 <main id="p-bd" class="pg" hidden><section class="card"><div class="sum"><h2 style="margin:0">Pilot leaderboard</h2><div class="btns"><select id="bm" style="width:auto"><option value="total">Total hours</option><option value="flight">Flight hours</option><option value="sim">Simulator hours</option></select><button id="br">Refresh</button></div></div><div class="scroll" id="bt"></div></section><section class="card" style="margin-top:12px"><h2>Your leaderboard profile</h2><label>Display name</label><input id="bn" maxlength="30" placeholder="Shown to other pilots"><label style="margin-top:8px"><input type="checkbox" id="bs" style="width:auto;min-height:0"> Show me on the leaderboard</label><div class="btns" style="margin-top:10px"><button class="p" id="bsave">Save profile</button></div><div class="mut" id="bmsg" style="margin-top:8px">Only your display name and hours are visible to other pilots. Flights, crew names and licences stay private.</div></section></main>
+
+<main id="p-im" class="pg" hidden><section class="card"><h2>Scan &amp; import</h2><p class="mut">Upload screenshots or PDFs of logbook pages, licences or medicals. Text is read inside your browser, then you review it before anything is added. On a PC you can also paste a screenshot with Ctrl+V.</p><select id="imt" style="width:auto"><option value="auto">Auto-detect</option><option value="log">Logbook pages</option><option value="lic">Licence / medical</option></select><label class="drop" id="drop">Tap to choose screenshots or PDFs, or drop them here<input type="file" id="imf" accept="image/*,application/pdf,.pdf" multiple hidden></label><div id="ims" class="mut" style="margin-top:8px"></div></section><section class="card" id="imr" hidden style="margin-top:12px"></section></main>
 
 <main id="p-lc" class="pg" hidden><section class="card"><div class="sum"><h2 style="margin:0">Licences, ratings &amp; medical</h2><button class="p" id="nl">+ Add</button></div><div class="fgrid" id="lgrid"></div></section></main>
 
@@ -379,8 +402,8 @@ document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)r
  if(d.fdel){if(d.arm){AC=AC.filter(a=>a.fleetId!==curF);F=F.filter(f=>f.id!==curF);curF="";render()}else{d.arm="1";b.textContent="Delete fleet and its aircraft?"}}
 });
 // ---- Tabs, summary, analytics ----
-const TABS=[["sum","◉","Summary"],["hub","◎","Hub"],["lg","☰","Logbook"],["fl","✈","Fleet"],["lc","★","Licences"],["an","▤","Stats"],["bd","♛","Board"],["dt","⇅","Data"]];
-function tab(k){TABS.forEach(([t])=>{$("#p-"+t).hidden=t!==k});document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===k));scrollTo(0,0);if(k==="hub")setTimeout(renderHub,30);if(k==="bd"&&sb&&USER)loadBoard()}
+const TABS=[["hub","◎","Hub"],["sum","◉","Summary"],["lg","☰","Logbook"],["fl","✈","Fleet"],["lc","★","Licences"],["im","⬆","Import"],["an","▤","Stats"],["bd","♛","Board"],["dt","⇅","Data"]];
+function tab(k){TABS.forEach(([t])=>{$("#p-"+t).hidden=t!==k});document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===k));scrollTo(0,0);if(k==="hub")setTimeout(()=>renderHub(true),30);if(k==="bd"&&sb&&USER)loadBoard()}
 $("#tabs").innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}"><i>${i}</i>${l}</button>`).join("");
 document.addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(b)tab(b.dataset.t)});
 $("#kpis").onclick=e=>{const c=e.target.closest(".kpi");if(!c)return;$("#fe").value=c.classList.contains("r")?"Real":c.classList.contains("s")?"Simulator":"";renderLog();tab("lg")};
@@ -474,7 +497,7 @@ window.addEventListener("offline",()=>setSync("\u23f3 Offline \u2013 changes wil
 setInterval(()=>{if(USER&&navigator.onLine){save();saveF();saveL();saveSet()}},20000);
 // ---- cloud PDFs (Supabase Storage, private bucket "documents") ----
 async function idbDo(m,k,v){const path=USER?USER.id+"/"+k:null;
- if(m==="put"){await idbLocal("put",k,v);if(sb&&path){const{error}=await sb.storage.from("documents").upload(path,v,{upsert:true,contentType:"application/pdf"});if(error)throw error}return}
+ if(m==="put"){await idbLocal("put",k,v);if(sb&&path){const{error}=await sb.storage.from("documents").upload(path,v,{upsert:true,contentType:v.type||"application/pdf"});if(error)throw error}return}
  if(m==="del"){try{await idbLocal("del",k)}catch(e){}if(sb&&path)await sb.storage.from("documents").remove([path]);return}
  let bl=null;try{bl=await idbLocal("get",k)}catch(e){}
  if(!bl&&sb&&path){const{data,error}=await sb.storage.from("documents").download(path);if(error)throw error;bl=data;try{await idbLocal("put",k,bl)}catch(e){}}
@@ -485,8 +508,9 @@ const apc=c=>AP[(c||"").trim().toUpperCase()];
 const hav=(a,b)=>{const R=3440.065,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,q=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(q))};
 function routeStats(){let nm=0,est=0;const unk=new Set(),pairs={},apv={};S.filter(x=>x.env==="Real").forEach(x=>{const a=apc(x.dep),b=apc(x.arr);if(x.dep&&!a)unk.add(x.dep.toUpperCase());if(x.arr&&!b)unk.add(x.arr.toUpperCase());if(a&&b){if(a[3]===b[3])est+=(+x.tot||0)*100;else nm+=hav(a,b);const k=a[3]+"\u2192"+b[3];pairs[k]=pairs[k]||{n:0,h:0};pairs[k].n++;pairs[k].h+=+x.tot||0;apv[a[3]]=(apv[a[3]]||0)+1;if(a[3]!==b[3])apv[b[3]]=(apv[b[3]]||0)+1}});return{nm,est,unk:[...unk],pairs,apv}}
 // ---- welcome ----
-function renderWelcome(){const n=(PROF&&PROF.display_name)||(USER?USER.email.split("@")[0]:"Pilot"),h=new Date().getHours(),g=h<12?"Good Morning":h<18?"Good Afternoon":"Good Evening",T=A(S);
- $("#welcome").innerHTML=`<div class="card hero"><div class="hello">${g}, ${esc(n)} \u2708</div><div class="mut">Welcome to TerbangLah! ${T.n?`You have ${f1(T.tot)} h logged across ${T.n} flights and sessions.`:"Log your first flight to get started."} Blue skies!</div></div>`}
+function setH(sel,h){const el=$(sel);if(el.dataset.h===h)return false;el.innerHTML=h;el.dataset.h=h;return true}
+function renderWelcome(){const n=(PROF&&PROF.display_name)||(USER?USER.email.split("@")[0]:"pilot"),h=new Date().getHours(),g=h<12?"Good morning":h<18?"Good afternoon":"Good evening",T=A(S);
+ setH("#welcome",`<div class="card hero"><div class="cloud c1"></div><div class="cloud c2"></div><div class="plane">\u2708</div><div class="hello">${g}, ${esc(n)}!</div><div class="mut">Welcome to TerbangLah \u2013 ${T.n?`${f1(T.tot)} h logged across ${T.n} flights and sessions. Blue skies!`:"log your first flight to get started."}</div></div>`)}
 // ---- automated goals & milestones ----
 function renderGoal(){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),yr=new Date().getFullYear(),Y=A(S.filter(x=>(x.date||"").startsWith(yr)));
  const bar=([l,v])=>{const nx=LAD.find(m=>m>v)||v,pv=[...LAD].reverse().find(m=>m<=v)||0,p=nx>pv?(v-pv)/(nx-pv)*100:100;return `<div class="tb"><div class="row"><span>${l}</span><span class="mut">${f1(v)} / ${nx} h</span></div><div class="bar"><i style="width:${p}%;background:var(--acc)"></i></div></div>`};
@@ -506,8 +530,13 @@ function renderCurr(){const R=S.filter(x=>x.env==="Real"&&x.date).sort((a,b)=>b.
  +[["Last 30 days",30],["Last 90 days",90],["Last 12 months",365]].map(([l,n])=>`<div class="rr"><span>${l}</span><b>${f1(A(inD(S,n)).tot)}</b></div>`).join("")
  +`<div class="mut" style="margin-top:8px">Indicative only \u2013 passenger-carrying and instrument currency rules differ by authority. Check yours.</div>`}
 // ---- hub ----
-function renderHub(){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),rs=routeStats(),km=(rs.nm+rs.est)*1.852,Ls=[...S].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
- $("#hubk").innerHTML=[["Total time",f1(T.tot)],["Flight time",f1(R.tot)],["Simulator",f1(M.tot)],["Distance",Math.round(km).toLocaleString()+" km"],["Airports",Object.keys(rs.apv).length],["Landings",T.ldg]].map(([l,v])=>`<div class="tile"><b>${v}</b><span>${l}</span></div>`).join("");
+// ---- hub (launch page) ----
+let MAPSIG="";
+function countUp(){document.querySelectorAll("#hubk [data-v]").forEach(el=>{const v=+el.dataset.v,k=el.dataset.k,t0=performance.now(),fmt=x=>k==="h"?f1(x):k==="km"?Math.round(x).toLocaleString()+" km":Math.round(x);(function st(t){const p=Math.min(1,(t-t0)/1100),e=1-Math.pow(1-p,3);el.textContent=fmt(v*e);if(p<1)requestAnimationFrame(st)})(t0)})}
+function renderHub(anim){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),rs=routeStats(),km=(rs.nm+rs.est)*1.852,Ls=[...S].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+ const fmt=(v,k)=>k==="h"?f1(v):k==="km"?Math.round(v).toLocaleString()+" km":v;
+ const ch=setH("#hubk",[["Total time",T.tot,"h","\u23f1"],["Flight time",R.tot,"h","\u2708"],["Simulator",M.tot,"h","\ud83c\udfae"],["Distance",km,"km","\ud83c\udf0d"],["Airports",Object.keys(rs.apv).length,"n","\ud83d\udccd"],["Landings",T.ldg,"n","\ud83d\udeec"]].map(([l,v,k,i])=>`<div class="tile"><i class="ti">${i}</i><b data-v="${v}" data-k="${k}">${fmt(v,k)}</b><span>${l}</span></div>`).join(""));
+ if(ch||anim===true)countUp();
  const f=[];
  if(T.tot)f.push(`\u23f1 ${f1(T.tot)} h logged \u2013 that\u2019s ${(T.tot/24).toFixed(1)} full days of flying.`);
  if(km)f.push(`\ud83c\udf0d You\u2019ve covered about ${Math.round(km).toLocaleString()} km (${Math.round(km/1.852).toLocaleString()} nm): ${(km/40075).toFixed(2)}\u00d7 around the Earth, or ${(km/384400*100).toFixed(1)}% of the way to the Moon.`);
@@ -520,14 +549,14 @@ function renderHub(){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(
  const ar=S.reduce((s,x)=>s+(+x.apD||0)+(+x.apN||0),0),hd=S.reduce((s,x)=>s+(+x.holds||0),0);if(ar||hd)f.push(`\ud83c\udfaf ${ar} approaches and ${hd} holds logged.`);
  if(Ls[0]&&Ls[0].date){const d=Math.max(1,days(Ls[0].date));f.push(`\ud83d\uddd3 Your logbook starts ${esc(Ls[0].date)} \u2013 ${d} days ago, about ${f1(T.tot/d*7)} h per week.`)}
  const tp=Object.entries(rs.pairs).sort((a,b)=>b[1].n-a[1].n)[0];if(tp)f.push(`\ud83d\udccd Favourite route: ${tp[0].replace("\u2192"," \u2192 ")} (${tp[1].n} flights).`);
- $("#facts").innerHTML=f.map(t=>`<div class="rr" style="display:block">${t}</div>`).join("")||`<div class="mut">Log some flights to unlock fun facts.</div>`;
+ setH("#facts",f.map((t,i)=>{const sp=t.indexOf(" ");return `<div class="fact" style="animation-delay:${i*70}ms"><span class="em">${t.slice(0,sp)}</span><span>${t.slice(sp+1)}</span></div>`}).join("")||`<div class="mut">Log some flights to unlock fun facts.</div>`);
  $("#mapn").textContent=`${Object.keys(rs.pairs).length} routes shown. Local flights count at an estimated 100 kt.`+(rs.unk.length?` Unrecognised codes: ${rs.unk.join(", ")}.`:"");
- drawMap(rs)}
+ const sig=JSON.stringify(rs.pairs)+Object.keys(rs.apv);if(sig!==MAPSIG||anim===true){MAPSIG=sig;drawMap(rs)}}
 function drawMap(rs){const el=$("#map");if(!window.L){el.innerHTML=`<div class="empty">Map library could not load.</div>`;return}
  if(!MAP){MAP=L.map("map",{scrollWheelZoom:false});L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"\u00a9 OpenStreetMap",maxZoom:12}).addTo(MAP);MG=L.layerGroup().addTo(MAP)}
  MG.clearLayers();const pts=[];
- Object.entries(rs.pairs).forEach(([k,v])=>{const[a,b]=k.split("\u2192");if(a===b)return;L.polyline([[AP[a][0],AP[a][1]],[AP[b][0],AP[b][1]]],{color:"#6366f1",weight:2+Math.min(4,v.n/2),opacity:.75}).bindPopup(`${a} \u2192 ${b}<br>${v.n} flights \u00b7 ${f1(v.h)}`).addTo(MG)});
- Object.entries(rs.apv).forEach(([c,n])=>{const p=AP[c];pts.push([p[0],p[1]]);L.circleMarker([p[0],p[1]],{radius:5+Math.min(10,n),color:"#0d9488",fillOpacity:.8}).bindPopup(`${c} \u2013 ${p[2]}<br>${n} visits`).addTo(MG)});
+ Object.entries(rs.pairs).forEach(([k,v])=>{const[a,b]=k.split("\u2192");if(a===b)return;L.polyline([[AP[a][0],AP[a][1]],[AP[b][0],AP[b][1]]],{color:"#6366f1",weight:2+Math.min(4,v.n/2),opacity:.75,className:"flow"}).bindPopup(`${a} \u2192 ${b}<br>${v.n} flights \u00b7 ${f1(v.h)}`).addTo(MG)});
+ Object.entries(rs.apv).forEach(([c,n])=>{const p=AP[c];pts.push([p[0],p[1]]);L.circleMarker([p[0],p[1]],{radius:5+Math.min(10,n),color:"#0d9488",fillOpacity:.8,className:"pulse"}).bindPopup(`${c} \u2013 ${p[2]}<br>${n} visits`).addTo(MG)});
  setTimeout(()=>{MAP.invalidateSize();if(pts.length)MAP.fitBounds(pts,{padding:[30,30],maxZoom:9});else MAP.setView([4,109],5)},80)}
 // ---- stats: city pairs & crew ----
 function renderIns(){const P={};S.forEach(x=>{if(x.dep&&x.arr){const k=x.dep.toUpperCase()+" \u2192 "+x.arr.toUpperCase();P[k]=P[k]||{n:0,h:0};P[k].n++;P[k].h+=+x.tot||0}});
@@ -538,11 +567,11 @@ function renderIns(){const P={};S.forEach(x=>{if(x.dep&&x.arr){const k=x.dep.toU
 function curView(){const v={regF};FIDS.forEach(s=>v[s]=$(s).value);return v}
 function applyView(v){regF=v.regF||"";FIDS.forEach(s=>{$(s).value=v[s]||""});if(v["#d1"]==="@30")$("#d1").value=new Date(Date.now()-30*864e5).toISOString().slice(0,10);renderLog();renderPre()}
 function renderPre(){const U=SET.presets||[];$("#pre").innerHTML=BUILTIN.concat(U).map((p,i)=>`<span style="display:inline-flex;gap:2px"><button class="chip" data-pv="${i}">${esc(p.name)}</button>${i>=BUILTIN.length?`<button class="chip del" data-pd="${i-BUILTIN.length}" title="Delete view">\u2715</button>`:""}</span>`).join("")+`<input id="pn" placeholder="Name this view\u2026" style="width:150px;min-height:34px"><button id="psv">Save view</button>`;
- const regs=uniq([...S.map(x=>x.reg),...AC.map(a=>a.reg)].filter(Boolean));$("#qj").innerHTML=`<span class="mut" style="align-self:center">Aircraft:</span><button class="chip${regF?"":" on"}" data-qj="">All</button>`+regs.map(r=>`<button class="chip${regF===r?" on":""}" data-qj="${esc(r)}">${esc(r)}</button>`).join("")}
+ const regs=uniq([...S.map(x=>x.type),...AC.map(a=>a.type)].filter(Boolean)),ct=$("#ft").value;$("#qj").innerHTML=`<span class="mut" style="align-self:center">Aircraft type:</span><button class="chip${ct?"":" on"}" data-qj="">All</button>`+regs.map(r=>`<button class="chip${ct===r?" on":""}" data-qj="${esc(r)}">${esc(r)}</button>`).join("")}
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
  if(d.pv!==undefined)applyView(BUILTIN.concat(SET.presets||[])[+d.pv].v);
  if(d.pd!==undefined){SET.presets.splice(+d.pd,1);saveSet();renderPre()}
- if(d.qj!==undefined){regF=d.qj;renderLog();renderPre()}
+ if(d.qj!==undefined){$("#ft").value=d.qj;renderLog();renderPre()}
  if(b.id==="psv"){const n=$("#pn").value.trim();if(!n)return;SET.presets=(SET.presets||[]).concat({name:n,v:curView()});saveSet();renderPre()}});
 // ---- reports ----
 const toCSVL=l=>COLS.join(",")+"\n"+l.map(x=>COLS.map(c=>csvQ(x[c])).join(",")).join("\n");
@@ -560,7 +589,59 @@ function drawBoard(){const m=$("#bm").value,L=[...BOARD].sort((a,b)=>b[m]-a[m]);
 $("#bm").onchange=drawBoard;$("#br").onclick=loadBoard;
 $("#bsave").onclick=async()=>{const n=$("#bn").value.trim(),m=$("#bmsg");if(!n){m.textContent="Enter a display name first.";return}const{error}=await sb.from("profiles").upsert({user_id:USER.id,display_name:n,show_on_leaderboard:$("#bs").checked,updated_at:new Date().toISOString()},{onConflict:"user_id"});if(error){m.textContent="Could not save: "+error.message;return}m.textContent="Profile saved.";await loadProfile();loadBoard()};
 
-tab("sum");render();boot();
+$("#ft").addEventListener("input",renderPre);
+// ---- scan & import (screenshots / PDFs -> logbook & licences) ----
+let IMP={rows:[],lics:[],text:""};
+const loadScript=u=>new Promise((res,rej)=>{if(document.querySelector(`script[src="${u}"]`))return res();const s=document.createElement("script");s.src=u;s.onload=res;s.onerror=()=>rej(new Error("Could not load a reading library \u2013 check your connection"));document.head.appendChild(s)});
+const setIm=t=>{$("#ims").textContent=t};
+async function ocrImage(file){await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+ const bmp=await createImageBitmap(file),k=bmp.width<2200?2:1,c=document.createElement("canvas");c.width=bmp.width*k;c.height=bmp.height*k;const g=c.getContext("2d");g.imageSmoothingQuality="high";g.drawImage(bmp,0,0,c.width,c.height);
+ const w=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")setIm("Reading text\u2026 "+Math.round(m.progress*100)+"%")}});const{data}=await w.recognize(c);await w.terminate();return data.text}
+async function pdfText(file){await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+ const doc=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;let out="";
+ for(let n=1;n<=doc.numPages;n++){const pg=await doc.getPage(n),tc=await pg.getTextContent(),L={};tc.items.forEach(it=>{const y=Math.round(it.transform[5]/3);(L[y]=L[y]||[]).push([it.transform[4],it.str])});
+  let t=Object.keys(L).sort((a,b)=>b-a).map(y=>L[y].sort((a,b)=>a[0]-b[0]).map(v=>v[1]).join(" ")).join("\n");
+  if(t.replace(/\s/g,"").length<30){setIm(`Scanning page ${n}\u2026`);const vp=pg.getViewport({scale:2.5}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;t=await ocrImage(await new Promise(r=>c.toBlob(r)))}
+  out+=t+"\n"}return out}
+const DRE=/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})|(\d{4})-(\d{2})-(\d{2})/g;
+const isoD=m=>m[4]?`${m[4]}-${m[5]}-${m[6]}`:`${m[3]}-${String(m[2]).padStart(2,"0")}-${String(m[1]).padStart(2,"0")}`;
+const datesIn=l=>[...l.matchAll(DRE)].map(isoD).filter(d=>+d.slice(0,4)>1950&&+d.slice(5,7)>=1&&+d.slice(5,7)<=12&&+d.slice(8,10)>=1&&+d.slice(8,10)<=31);
+const mins=t=>{const[h,m]=t.split(":");return +h*60+ +m};
+const TYPES=/\b(DA40(?:NG|TDI)?|DA42|C172|C152|C182|PA28|PA34|SR20|SR22|B7[0-9]{2}|A3[0-9]{2}|A20N|ATR ?\d{2}|AT7[0-9]|PC-?12|E190|E170|Q400|TB20)\b/;
+const REGX=/\b([0-9][A-Z]-[A-Z]{3}|[A-Z]-[A-Z]{4}|[A-Z]{2}-[A-Z]{3}|N[0-9]{1,5}[A-Z]{0,2})\b/;
+function parseLog(text,fname){const rows=[];text.split(/\n/).forEach(raw=>{const line=raw.replace(/\|/g," ").trim(),ds=datesIn(line);if(!ds.length)return;
+ const ts=[...line.matchAll(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g)].map(m=>m[0]);if(!ts.length)return;
+ const up=line.toUpperCase(),sim=/SIM|FSTD|FNPT|FFS|SYNTHETIC/.test(up),ap=[...up.matchAll(/\b[A-Z]{4}\b/g)].map(m=>m[0]).filter(c=>AP[c]);
+ let tot=0,offB="",onB="";if(ts.length>=3){offB=ts[0];onB=ts[1];tot=mins(ts[2])}else if(ts.length===2){offB=ts[0];onB=ts[1];tot=Math.max(0,mins(ts[1])-mins(ts[0]))}else tot=mins(ts[0]);
+ rows.push({date:ds[0],env:sim?"Simulator":"Real",type:(up.match(TYPES)||[""])[0],reg:sim?((up.match(/\b(?:D?SIM|FFS|FNPT)[ -]?[A-Z0-9]*/)||[""])[0]):((up.match(REGX)||[""])[0]),dep:sim?"":ap[0]||"",arr:sim?"":ap[1]||ap[0]||"",tot:f1(tot/60),ld:sim?0:1,offB,onB,pic:(line.match(/\b(?:CAPT|CAP|F\/O|FO|INSTR)\.?\s+[A-Za-z]+(?:\s+[A-Za-z]+)?/i)||[""])[0],flt:(up.match(/COR\s*[\d.]+[- ]?[A-Z]*/)||[""])[0],rem:"Imported from "+fname,use:true})});return rows}
+function parseLic(text,fname){const up=text.toUpperCase();if(!/LICEN[CS]E|CERTIFICATE|MEDICAL|RATING|ENDORSEMENT|VALID|EXPIR/.test(up))return null;
+ let iss="",exp="";const all=[];text.split(/\n/).forEach(l=>{const d=datesIn(l);all.push(...d);if(!d.length)return;if(/EXPIR|VALID (UNTIL|TO|THRU)|UNTIL|RENEW/i.test(l))exp=exp||d[d.length-1];else if(/ISSU|DATE OF/i.test(l))iss=iss||d[0]});
+ all.sort();if(!exp&&all.length>1)exp=all[all.length-1];if(!iss&&all.length)iss=all[0];if(iss===exp)exp="";
+ const nm=(up.match(/\b(ATPL|MPL|CPL|PPL|LAPL|SPL|IR|IFR|MEP|SEP|CLASS\s*[12]\s*MEDICAL|MEDICAL CERTIFICATE|TYPE RATING|INSTRUMENT RATING|NIGHT RATING)\b/)||[""])[0];
+ return{cat:/MEDICAL/.test(up)?"Medical":/RATING|ENDORSEMENT/.test(up)?"Rating":"Licence",name:nm||fname.replace(/\.[^.]+$/,""),no:(up.match(/(?:LICEN[CS]E|CERTIFICATE|REF(?:ERENCE)?|NO\.?|NUMBER)[ :#.\-]*(?=[A-Z0-9\/\-]*\d)([A-Z0-9][A-Z0-9\/\-]{4,})/)||[])[1]||"",auth:(up.match(/\b(CAAM|CAAS|EASA|FAA|CAA|DGCA|CASA|CAAT)\b/)||[""])[0],iss,exp,note:"Imported from "+fname,attach:true}}
+async function runImport(files){IMP={rows:[],lics:[],text:""};const mode=$("#imt").value;
+ for(const f of files){try{setIm(`Reading ${f.name}\u2026`);const text=(/pdf/i.test(f.type)||/\.pdf$/i.test(f.name))?await pdfText(f):await ocrImage(f);IMP.text+=`\n===== ${f.name} =====\n`+text;
+  const rows=parseLog(text,f.name);let m=mode;if(m==="auto")m=rows.length>=2?"log":"lic";
+  if(m==="log")IMP.rows.push(...rows);else{const l=parseLic(text,f.name);if(l){l.file=f;IMP.lics.push(l)}else if(rows.length)IMP.rows.push(...rows)}}catch(e){setIm("Could not read "+f.name+": "+(e.message||e));IMP.text+=`\n[${f.name}: failed]`;return}}
+ IMP.rows.forEach(r=>{r.dup=S.some(x=>x.date===r.date&&x.env===r.env&&Math.abs((+x.tot||0)-pt(r.tot))<.02);r.use=!r.dup});setIm(`Done: ${IMP.rows.length} flight rows and ${IMP.lics.length} licence items found. Review, then add.`);drawImp()}
+function drawImp(){const el=$("#imr");el.hidden=false;const inp=(i,k,v,w)=>`<input data-ri="${i}" data-k="${k}" value="${esc(v)}" style="min-width:${w}px;padding:4px 6px;min-height:30px;font-size:13px">`;let h="";
+ if(IMP.rows.length)h+=`<h2>Logbook entries found</h2><div class="scroll"><table class="bd"><tr><th></th><th>Date</th><th>Env</th><th>Type</th><th>Reg</th><th>Dep</th><th>Arr</th><th>Total</th><th>Ldg</th></tr>${IMP.rows.map((r,i)=>`<tr><td><input type="checkbox" data-rc="${i}" ${r.use?"checked":""} style="width:auto;min-height:0"></td><td>${inp(i,"date",r.date,100)}</td><td><select data-ri="${i}" data-k="env" style="padding:4px;min-height:30px"><option value="Real"${r.env==="Real"?" selected":""}>Flight</option><option${r.env==="Simulator"?" selected":""}>Simulator</option></select></td><td>${inp(i,"type",r.type,70)}</td><td>${inp(i,"reg",r.reg,90)}</td><td>${inp(i,"dep",r.dep,60)}</td><td>${inp(i,"arr",r.arr,60)}</td><td>${inp(i,"tot",r.tot,56)}</td><td>${inp(i,"ld",r.ld,36)}</td></tr>${r.dup?`<tr><td></td><td colspan="8" class="mut" style="text-align:left">Looks like a duplicate of an existing entry (left unticked)</td></tr>`:""}`).join("")}</table></div><button class="p" id="imadd" style="margin-top:10px">Add ticked flights to logbook</button>`;
+ IMP.lics.forEach((l,i)=>{const f=(k,lb,w)=>`<div class="${w||"w2"}"><label>${lb}</label><input data-li="${i}" data-k="${k}" value="${esc(l[k])}"></div>`;h+=`<h2 style="margin-top:16px">Licence / medical found in ${esc(l.file.name)}</h2><div class="fg"><div class="w2"><label>Category</label><select data-li="${i}" data-k="cat">${["Licence","Rating","Medical","Endorsement","Other"].map(c=>`<option${l.cat===c?" selected":""}>${c}</option>`).join("")}</select></div>${f("name","Name")}${f("no","Number")}${f("auth","Authority")}<div class="w2"><label>Issued</label><input type="date" data-li="${i}" data-k="iss" value="${esc(l.iss)}"></div><div class="w2"><label>Valid until</label><input type="date" data-li="${i}" data-k="exp" value="${esc(l.exp)}"></div></div><div class="btns" style="margin-top:10px"><button class="p" data-la="${i}">Add to licences (attaches the file)</button></div>`});
+ h+=`<details style="margin-top:14px"><summary class="mut" style="cursor:pointer">Show extracted text</summary><pre style="white-space:pre-wrap;font-size:12px;max-height:260px;overflow:auto">${esc(IMP.text)}</pre></details>`;el.innerHTML=h}
+function upsertLic(o){const today=new Date().toISOString().slice(0,10),cur=LC.find(x=>x.cat===o.cat&&(x.name||"").toLowerCase()===o.name.toLowerCase());if(!cur){LC.push(Object.assign({id:uid()},o));return}
+ if(cur.exp!==o.exp||cur.iss!==o.iss||cur.no!==o.no){const{history,...prev}=cur;cur.history=[...(history||[]),{...prev,archived:today}];cur.updated=today;Object.assign(cur,o,{files:[...(o.files||[])]})}else cur.files=[...(cur.files||[]),...(o.files||[])]}
+document.addEventListener("input",e=>{const t=e.target;if(t.dataset.ri!==undefined)IMP.rows[+t.dataset.ri][t.dataset.k]=t.value;if(t.dataset.li!==undefined)IMP.lics[+t.dataset.li][t.dataset.k]=t.value});
+document.addEventListener("change",e=>{const t=e.target;if(t.dataset.rc!==undefined)IMP.rows[+t.dataset.rc].use=t.checked});
+document.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.id==="imadd"){const L=IMP.rows.filter(r=>r.use);L.forEach(r=>S.push(mk({date:r.date,env:r.env==="Simulator"?"Simulator":"Real",type:r.type,reg:r.reg,dep:r.dep,arr:r.arr,tot:pt(r.tot),ldgD:+r.ld||0,offB:r.offB,onB:r.onB,pic:r.pic,flt:r.flt,mission:"Imported",rem:r.rem})));IMP.rows=IMP.rows.filter(r=>!r.use);drawImp();render();setIm(`Added ${L.length} flights to your logbook.`)}
+ if(b.dataset.la!==undefined){const l=IMP.lics[+b.dataset.la],o={cat:l.cat,name:l.name,no:l.no,auth:l.auth,iss:l.iss,exp:l.exp,note:l.note,files:[]};
+  if(l.file){const id=uid();try{await idbDo("put",id,l.file);o.files=[{id,name:l.file.name,size:l.file.size}]}catch(_){}}
+  upsertLic(o);IMP.lics.splice(+b.dataset.la,1);drawImp();render();setIm("Added to your licences.")}});
+$("#imf").onchange=e=>{runImport([...e.target.files]);e.target.value=""};
+const dz=$("#drop");["dragover","dragenter"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.add("on")}));["dragleave","drop"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.remove("on")}));dz.addEventListener("drop",e=>runImport([...e.dataTransfer.files]));
+document.addEventListener("paste",e=>{if($("#p-im").hidden)return;const f=[...((e.clipboardData&&e.clipboardData.files)||[])];if(f.length)runImport(f)});
+
+tab("hub");render();boot();
 </script>
 </body>
 </html>
