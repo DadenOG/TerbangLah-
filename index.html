@@ -485,7 +485,7 @@ const apc=c=>AP[(c||"").trim().toUpperCase()];
 const hav=(a,b)=>{const R=3440.065,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,q=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(q))};
 function routeStats(){let nm=0,est=0;const unk=new Set(),pairs={},apv={};S.filter(x=>x.env==="Real").forEach(x=>{const a=apc(x.dep),b=apc(x.arr);if(x.dep&&!a)unk.add(x.dep.toUpperCase());if(x.arr&&!b)unk.add(x.arr.toUpperCase());if(a&&b){if(a[3]===b[3])est+=(+x.tot||0)*100;else nm+=hav(a,b);const k=a[3]+"\u2192"+b[3];pairs[k]=pairs[k]||{n:0,h:0};pairs[k].n++;pairs[k].h+=+x.tot||0;apv[a[3]]=(apv[a[3]]||0)+1;if(a[3]!==b[3])apv[b[3]]=(apv[b[3]]||0)+1}});return{nm,est,unk:[...unk],pairs,apv}}
 // ---- welcome ----
-function renderWelcome(){const n=(PROF&&PROF.display_name)||(USER?USER.email.split("@")[0]:"pilot"),h=new Date().getHours(),g=h<12?"Good morning":h<18?"Good afternoon":"Good evening",T=A(S);
+function renderWelcome(){const n=(PROF&&PROF.display_name)||(USER?USER.email.split("@")[0]:"Pilot"),h=new Date().getHours(),g=h<12?"Good Morning":h<18?"Good Afternoon":"Good Evening",T=A(S);
  $("#welcome").innerHTML=`<div class="card hero"><div class="hello">${g}, ${esc(n)} \u2708</div><div class="mut">Welcome to TerbangLah! ${T.n?`You have ${f1(T.tot)} h logged across ${T.n} flights and sessions.`:"Log your first flight to get started."} Blue skies!</div></div>`}
 // ---- automated goals & milestones ----
 function renderGoal(){const T=A(S),R=A(S.filter(x=>x.env==="Real")),M=A(S.filter(x=>x.env==="Simulator")),yr=new Date().getFullYear(),Y=A(S.filter(x=>(x.date||"").startsWith(yr)));
